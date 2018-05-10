@@ -171,21 +171,15 @@
             </nav>
         </header>
             <!-- Fin header -->
-            
            
 <script>
     function quitar_clases_barra_lateral_izq() {
-        var barra = document.getElementById("barra_lateral_izq");
-        var barra_scroll = document.getElementById("barra_lateral_izq_scroll");
-        if (barra.style.position != "fixed") {
-            barra.style.position = "fixed";
-            barra.style.bottom = "0";
-            barra.style.top = "0";
-            barra_scroll.style.overflowY = "scroll";
-            barra_scroll.style.height = "100%";
+        var lista_categorias = document.getElementById("lista_categorias");
+        if (lista_categorias.style.position != "absolute") {
+            lista_categorias.style.position = "absolute";
+            lista_categorias.style.width = "100%";
         } else {
-            barra.style = "";
-            barra_scroll.style = "";
+            lista_categorias.style.position = "";
         }
     }
 </script>
