@@ -138,7 +138,7 @@ efecto deseado
                         <?php if ($contador == 4) {echo "<div style='clear:both'></div>"; $contador = 0;} ?>
                     <?php } ?>
                </div>
-               
+               <!-- Paginación -->
                <div class="centrado <?php if ($total_productos <= $productos_pagina) { echo "ocultar"; } ?>">
                     <nav aria-label="Page navigation">
                         <ul class="pagination">
@@ -182,7 +182,7 @@ efecto deseado
                         </ul>
                         <div>
                             <form action="javascript:ir_a_pagina(<?php echo $total_paginas ?>)">
-                                <label for="pagina">Pagina </label>
+                                <label for="pagina">Página </label>
                                 <input id="pagina" name="pagina" value="<?php echo $pagina ?>" type="text" autocomplete="off">
                                 <label>de <?php echo $total_paginas ?></label>
                                 <button id="pagina_boton" type="button" onclick="ir_a_pagina(<?php echo $total_paginas ?>)">Ir</button>
@@ -190,7 +190,9 @@ efecto deseado
                         </div>
                     </nav>
                 </div>
+            
             </section>
+            <!-- Fin Paginación -->
             <!-- /.content -->
         </div>
         <!-- /.content-wrapper -->

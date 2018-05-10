@@ -333,10 +333,10 @@ efecto deseado
                                                     <th><?php echo $producto[0]["proteccion_ip"]; ?></th>
                                                 </tr>
                                             <?php } ?>
-                                            <?php if ($producto[0]["codigo"] != "") { ?>
+                                            <?php if ($producto[0]["proteccion_ik"] != "") { ?>
                                                    <tr>
-                                                    <td>Aislamiento eléctrico</td>
-                                                    <th><?php echo $producto[0]["codigo"]; ?></th>
+                                                    <td>Protección IK</td>
+                                                    <th><?php echo $producto[0]["proteccion_ik"]; ?></th>
                                                 </tr>
                                             <?php } ?>
                                             <?php if ($producto[0]["ancho_mm"] != "" && $producto[0]["largo_mm"] != "" && $producto[0]["alto_mm"] != "") { ?>
