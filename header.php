@@ -1,6 +1,6 @@
         <?php include("bd.php"); ?>
         
-        <header class="main-header">
+        <header style="position: fixed; top: 0; left: 0; right: 0;" class="main-header">
 
             <!-- Logo -->
             <a href="index.php" class="logo">

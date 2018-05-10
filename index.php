@@ -183,7 +183,7 @@ efecto deseado
                         <div>
                             <form action="javascript:ir_a_pagina(<?php echo $total_paginas ?>)">
                                 <label for="pagina">Pagina </label>
-                                <input id="pagina" name="pagina" value="<?php echo $pagina ?>" type="text">
+                                <input id="pagina" name="pagina" value="<?php echo $pagina ?>" type="text" autocomplete="off">
                                 <label>de <?php echo $total_paginas ?></label>
                                 <button id="pagina_boton" type="button" onclick="ir_a_pagina(<?php echo $total_paginas ?>)">Ir</button>
                             </form>

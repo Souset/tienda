@@ -209,3 +209,7 @@
 .alert h2 i {
     padding-right: 20px;
 }
+
+body {
+    margin-top: 50px;
+}
