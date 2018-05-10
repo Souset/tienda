@@ -223,3 +223,11 @@ body {
         margin: 3px 5px;
     }
 }
+
+.login-page{
+    background-color:rgba(60, 141, 188, 0.8);
+}
+
+.login-logo a{
+    color:white;
+}
