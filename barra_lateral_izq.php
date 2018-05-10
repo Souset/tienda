@@ -34,7 +34,7 @@
         <!-- /.search form -->
 
         <!-- Sidebar Menu -->
-        <ul class="sidebar-menu" data-widget="tree">
+        <ul id="lista_categorias" class="sidebar-menu" data-widget="tree">
             <li class="header"><h4 class="estilo_h4">CATÁLOGO</h4></li>
             <!-- Optionally, you can add icons to the links -->
             
