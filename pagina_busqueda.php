@@ -147,7 +147,7 @@ efecto deseado
                         <?php } ?>
                    </div>
                    
-                   <div class="centrado <?php if ($total_productos <= $productos_pagina) { echo "ocultar"; } ?>">
+                   <div class="col-xs-12 centrado <?php if ($total_productos <= $productos_pagina) { echo "ocultar"; } ?>">
                     <nav aria-label="Page navigation">
                         <ul class="pagination">
                             <li class="<?php if ($pagina == 1) { echo "disabled"; } ?>">

@@ -13,7 +13,7 @@
             <!-- Header Navbar -->
             <nav class="navbar navbar-static-top" role="navigation">
                 <!-- Sidebar toggle button-->
-                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button" onclick="quitar_clases_barra_lateral_izq();">
             <span class="sr-only">Toggle navigation</span>
             </a>
                 <!-- Navbar Right Menu -->
@@ -171,3 +171,21 @@
             </nav>
         </header>
             <!-- Fin header -->
+            
+           
+<script>
+    function quitar_clases_barra_lateral_izq() {
+        var barra = document.getElementById("barra_lateral_izq");
+        var barra_scroll = document.getElementById("barra_lateral_izq_scroll");
+        if (barra.style.position != "fixed") {
+            barra.style.position = "fixed";
+            barra.style.bottom = "0";
+            barra.style.top = "0";
+            barra_scroll.style.overflowY = "scroll";
+            barra_scroll.style.height = "100%";
+        } else {
+            barra.style = "";
+            barra_scroll.style = "";
+        }
+    }
+</script>

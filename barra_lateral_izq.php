@@ -4,10 +4,10 @@
     $familias = Query($sql);
 ?>
 <!-- Left side column. contains the logo and sidebar -->
-<aside style="position: fixed;" class="main-sidebar">
+<aside id="barra_lateral_izq" style="position: fixed; bottom: 0; top: 0;" class="main-sidebar">
 
     <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
+    <section id="barra_lateral_izq_scroll" style="overflow-y: scroll; height: 100%;" class="sidebar">
 
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel">

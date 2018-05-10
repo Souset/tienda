@@ -213,3 +213,13 @@
 body {
     margin-top: 50px;
 }
+
+#barra_lateral_izq_scroll::-webkit-scrollbar {
+      visibility: hidden;
+}
+
+@media (max-width: 767px) {
+    .pagination a {
+        margin: 3px 5px;
+    }
+}
