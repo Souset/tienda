@@ -70,8 +70,8 @@
     </div>
     <!-- /.social-auth-links -->
 
-    <a href="#">I forgot my password</a><br>
-    <a href="register.html" class="text-center">Register a new membership</a>
+    <a href="#">Olvidé mi contraseña</a><br>
+    <a href="register.html" class="text-center">Registra una nueva Membresía</a>
 
   </div>
   <!-- /.login-box-body -->
