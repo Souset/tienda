@@ -543,8 +543,8 @@ efecto deseado
                 var precio_total = document.getElementById("precio_total");
                 var precio = <?php echo $producto[0]["PVP"]; ?>;
                 precio_total.innerHTML = precio * cantidad.value + " €";
-                //history.replaceState(null, "", "producto <?php echo $titulo_tonalidad_url; ?>");
-                //alert("<?php echo $titulo_tonalidad_url; ?>");
+                //history.replaceState(null, "", "producto <?php //echo $titulo_tonalidad_url; ?>");
+                //alert("<?php //echo $titulo_tonalidad_url; ?>");
             }
         </script>
     </body>
