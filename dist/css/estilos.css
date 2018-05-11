@@ -229,3 +229,11 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.login-page{ 
+    background-color:rgba(60, 141, 188, 0.8); 
+} 
+ 
+.login-logo a{ 
+    color:white; 
+}
