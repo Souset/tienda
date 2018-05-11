@@ -6,10 +6,6 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 <html>
 <?php include_once("head.php")?>
 <?php include_once("header.php")?>
-<?php include_once("barra_lateral_izq.php")?>
-<?php include_once("barra_lateral_derecha.php")?>
-
-
 
 <?php
 
@@ -17,15 +13,40 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
         $termino_buscar = $_GET["buscar"];
 
         /*$sql = "SELECT * FROM productos WHERE titulo LIKE '%termino_buscar%'";
-        $resultados = Query($sql);*/
+        $productos = Query($sql);*/
 
-        $sql = "SELECT * FROM productos WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%' LIMIT 45";
-        $resultados = Query($sql);
+        $sql = "SELECT id
+                FROM productos
+                WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%'";
+        $productos = Query($sql);
+        
+        if (is_array($productos)) {
+            $total_productos = count($productos);
+            $productos_pagina = 16;
 
+            if(isset($_GET["pagina"])){
+                $pagina=$_GET["pagina"];
+                $inicio = ($pagina - 1) * $productos_pagina;
+            } else {
+                $inicio = 0;
+                $pagina = 1;
+            }
+
+            $sql = "SELECT id, titulo, imagen, PVP
+                    FROM productos
+                    WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%'
+                    LIMIT $inicio, $productos_pagina";
+            $productos = Query($sql);
+
+            $total_paginas = ceil($total_productos / $productos_pagina);
+        }
+        
     }
-
-
 ?>
+
+<?php include_once("barra_lateral_izq.php")?>
+<?php include_once("barra_lateral_derecha.php")?>
+
 
 <!--
 BODY TAG OPTIONS:
@@ -57,7 +78,7 @@ efecto deseado
             <!--  Contiene el encabezado y el contenido de la página. -->
             <section class="content-header">
                 <h1>
-                    <b>DESTACADOS</b> DE LA SEMANA
+                    <b>RESULTADOS</b> DE LA BÚSQUEDA
                     <small><?php echo date("d-m-Y"); ?></small>
                 </h1>
                 <ol class="breadcrumb">
@@ -70,37 +91,113 @@ efecto deseado
             <section class="content container-fluid">
 
                     <div class="row">
-                       <?php if (is_array($resultados)) { ?>
-                        <?php $contador=0; ?>
-                        <?php for($i=0; $i<count($resultados); $i++) { ?>
-                        <?php $contador++; ?>
-                            <div class="col-xs-6 col-md-3">
-                                <div class="mas_detalles">
-                                    <a href="pagina_producto.php?id=<?php echo $resultados[$i]["id"] ?>">
-                                        <div class="thumbnail">
-                                            <img src="<?php echo $resultados[$i]["imagen"] ?>">
-                                            <div class="caption">
-                                                <center><h5 class="targeta_titulo"><?php echo $resultados[$i]["titulo"] ?></h5>
-                                                <br><br>
-                                                <p class="targeta_precio"><b><?php echo $resultados[$i]["PVP"] ?> €</b></p>
-                                                </center>
-                                                <br>
+                        <?php if (is_array($productos)) { ?>
+                            <?php $contador=0; ?>
+                            <?php for($i=0; $i<count($productos); $i++) { ?>
+                                <?php $contador++; ?>
+                                <div class="col-xs-6 col-md-3">
+                                    <div class="mas_detalles">
+                                        <a href="pagina_producto.php?id=<?php echo $productos[$i]["id"] ?>">
+                                            <div class="thumbnail">
+                                                <img src="<?php echo $productos[$i]["imagen"] ?>">
+                                                <div class="caption">
+                                                    <?php
+                                                        if (strpos($productos[$i]["titulo"], ", regulable")) {
+                                                            $titulo_tonalidad = substr($productos[$i]["titulo"], 0, strpos($productos[$i]["titulo"], ", regulable"));
+                                                        } else {
+                                                            $titulo_tonalidad = $productos[$i]["titulo"];
+                                                        }
+                                                        if (strpos($titulo_tonalidad, ", Blanco ")) {
+                                                            $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, ", Blanco "));
+                                                            $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, ", Blanco "));
+                                                        } elseif (strpos($titulo_tonalidad, " + Blanco ")) {
+                                                            $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, " + Blanco "));
+                                                            $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, " + Blanco "));
+                                                        } else {
+                                                            $titulo = $titulo_tonalidad;
+                                                            $tonalidad = "";
+                                                        }
+                                                        switch ($tonalidad) {
+                                                            case " + Blanco neutro":
+                                                                $tonalidad = ", Blanco neutro";
+                                                                break;
+                                                            case " + Blanco frío":
+                                                                $tonalidad = ", Blanco frío";
+                                                                break;
+                                                            case " + Blanco cálido":
+                                                                $tonalidad = ", Blanco cálido";
+                                                                break;
+                                                        }
+                                                    ?>
+                                                    <h5 class="targeta_titulo"><?php echo $titulo ?><small><?php echo $tonalidad ?></small></h5>
+                                                    <p class="targeta_precio"><b><?php echo $productos[$i]["PVP"] ?> €</b></p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                            <?php if ($contador == 4) {echo "<div style='clear:both'></div>"; $contador = 0;} ?>
-                        <?php } ?>
+                                <?php if ($contador == 4) { echo "<div style='clear:both'></div>"; $contador = 0; } ?>
+                            <?php } ?>
                         <?php } else { ?>
                             <div class="container">
-                                <div class="alert alert-warning" role="alert">
+                                <div class="alert alert-warning col-sm-9 centrado" role="alert">
                                     <h2><i class="fas fa-exclamation-triangle"></i>  No se han encontrado resultados</h2>
                                 </div>
                             </div>
                         <?php } ?>
                    </div>
                    
+                   <div class="col-xs-12 centrado <?php if ($total_productos <= $productos_pagina) { echo "ocultar"; } ?>">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="<?php if ($pagina == 1) { echo "disabled"; } ?>">
+                                <a href="<?php if ($pagina > 1) { echo "pagina_busqueda.php?buscar=$termino_buscar&pagina=" . ($pagina - 1); } else { echo "#"; } ?>" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <?php if ($total_paginas < 10) { ?>
+                                <?php for ($j=1; $j<=$total_paginas; $j++) { ?>
+                                    <li class="<?php if ($pagina == $j) { echo "active"; } ?>">
+                                        <a href="<?php if ($pagina != $j) { echo "pagina_busqueda.php?buscar=$termino_buscar&pagina=" . $j; } else { echo "#"; } ?>">
+                                            <?php echo $j?>
+                                        </a>
+                                    </li>
+                                <?php } ?>
+                            <?php } elseif ($total_paginas - $pagina < 10) { ?>
+                                <?php for ($j=$total_paginas-9; $j<=$total_paginas; $j++) { ?>
+                                    <li class="<?php if ($pagina == $j) { echo "active"; } ?>">
+                                        <a href="<?php if ($pagina != $j) { echo "pagina_busqueda.php?buscar=$termino_buscar&pagina=" . $j; } else { echo "#"; } ?>">
+                                            <?php echo $j?>
+                                        </a>
+                                    </li>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <?php for ($j=$pagina; $j<$pagina+10; $j++) { ?>
+                                    <?php if ($j <= $total_paginas) { ?>
+                                        <li class="<?php if ($pagina == $j) { echo "active"; } ?>">
+                                            <a href="<?php if ($pagina != $j) { echo "pagina_busqueda.php?buscar=$termino_buscar&pagina=" . $j; } else { echo "#"; } ?>">
+                                                <?php echo $j?>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
+                                <?php } ?>
+                            <?php } ?>
+                            <li class="<?php if ($pagina == $total_paginas) { echo "disabled"; } ?>">
+                                <a href="<?php if ($pagina < $total_paginas) { echo "pagina_busqueda.php?buscar=$termino_buscar&pagina=" . ($pagina + 1); } else { echo "#"; } ?>" aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div>
+                            <form action="javascript:ir_a_pagina(<?php echo $total_paginas . ", '" . $termino_buscar . "'" ?>)">
+                                <label for="pagina">Pagina </label>
+                                <input id="pagina" name="pagina" value="<?php echo $pagina ?>" type="text" autocomplete="off">
+                                <label>de <?php echo $total_paginas ?></label>
+                                <button id="pagina_boton" type="button" onclick="ir_a_pagina(<?php echo $total_paginas . ", '" . $termino_buscar . "'" ?>)">Ir</button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
             </section>
             <!-- /.content -->
         </div>
@@ -124,6 +221,19 @@ efecto deseado
     <!-- Opcionalmente, puede agregar complementos Slimscroll y FastClick.
       Se recomiendan estos dos complementos para mejorar el
       experiencia de usuario. -->
+      
+    <script>
+        function ir_a_pagina(total_paginas, buscar) {
+            var pagina = document.getElementById("pagina");
+            pagina.value = parseInt(pagina.value);
+            if (pagina.value < 1 || isNaN(pagina.value)) {
+                pagina.value = 1;
+            } else if (pagina.value > total_paginas) {
+                pagina.value = total_paginas;
+            }
+            document.location.href = "pagina_busqueda.php?buscar=" + buscar + "&pagina=" + pagina.value;
+        }
+    </script>
 </body>
 
 </html>

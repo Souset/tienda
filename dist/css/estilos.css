@@ -1,11 +1,18 @@
 .targeta_precio {
     font-size: 1.5em;
     color: #3c8dbc;
+    text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
 .targeta_titulo {
-    height: 20px;
+    height: 70px;
     color: #2c3b41;
+    text-align: center;
+    font-size: 1.2em;
+    overflow: hidden;
+    margin: 0;
 }
 
 .imagen100 {
@@ -31,10 +38,11 @@
 
 .producto_titulo {
     color: #2c3b41;
+    font-size: 1.3em;
 }
 
 .familia_titulo {
-    color: whitesmoke;
+    color: ghostwhite;
 }
 
 .familia_precio {
@@ -49,10 +57,17 @@
 
 .mas_detalles {
     cursor: pointer;
+    filter: brightness(97%);
 }
 
 .mas_detalles:hover {
-    filter: contrast(70%);
+    filter: brightness(100%);
+    border-radius: 4px;
+    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+}
+
+.mas_detalles:hover .targeta_titulo {
+    color: #3c8dbc;
 }
 
 .mostrar_familia {
@@ -61,10 +76,15 @@
 
 .targeta_peq {
     background-color: #2c3b41;
+    filter: brightness(90%);
 }
 
 .targeta_peq:hover {
-    filter: brightness(70%);
+    filter: brightness(100%);
+}
+
+.targeta_peq:hover .familia_titulo{
+    color: white;
 }
 
 .nav-pills div li img:hover {
@@ -118,4 +138,94 @@
     border-radius: 4px;
     background-color: #2c3b41;
     color: yellow;
+}
+
+.estilo_hr {
+    margin: 10px -10px;
+}
+
+.estilo_h3 {
+    margin-top: 0px;
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.estilo_h4 {
+    margin: 7px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.margen_bajo_0 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.sin_padding div {
+    padding: 0;
+}
+
+.mas_menos label {
+    font-size: 1.3em;
+    font-weight: normal;
+}
+
+.mas_menos button, .mas_menos input {
+    width: 100%;
+}
+
+.mas_menos input {
+    text-align: center;
+}
+
+.mas_menos h4 {
+    text-align: right;
+    font-size: 1.7em;
+    font-weight: bold;
+    color: #3c8dbc;
+    margin-top: 5px;
+}
+
+.logo img {
+    width:30px;
+    margin-top:-7px;
+}
+
+.centrado {
+    text-align: center;
+}
+
+#pagina, #pagina_boton {
+    width: 70px;
+    text-align: center;
+}
+
+.ocultar {
+    display: none;
+}
+
+.alert h2 i {
+    padding-right: 20px;
+}
+
+body {
+    margin-top: 50px;
+}
+
+#barra_lateral_izq_scroll::-webkit-scrollbar {
+      display: none;
+}
+
+@media (max-width: 767px) {
+    .pagination a {
+        margin: 3px 5px;
+    }
+}
+
+.treeview-menu li a {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

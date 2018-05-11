@@ -4,10 +4,10 @@
     $familias = Query($sql);
 ?>
 <!-- Left side column. contains the logo and sidebar -->
-<aside class="main-sidebar">
+<aside id="barra_lateral_izq" style="position: fixed; bottom: 0; top: 0;" class="main-sidebar">
 
     <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
+    <section id="barra_lateral_izq_scroll" style="overflow-y: scroll; height: 100%;" class="sidebar">
 
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel">
@@ -24,7 +24,7 @@
         <!-- search form (Optional) -->
         <form action="pagina_busqueda.php" method="get" class="sidebar-form">
             <div class="input-group">
-                <input type="text" name="buscar" class="form-control" placeholder="Buscar...">
+                <input style="<?php if (isset($termino_buscar)) { echo 'background-color: whitesmoke;'; } ?>" type="text" name="buscar" class="form-control" placeholder="Buscar..." value="<?php if (isset($termino_buscar)) { echo $termino_buscar; } ?>">
                 <span class="input-group-btn">
               <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
               </button>
@@ -34,8 +34,8 @@
         <!-- /.search form -->
 
         <!-- Sidebar Menu -->
-        <ul class="sidebar-menu" data-widget="tree">
-            <li class="header">CATEGORIAS</li>
+        <ul id="lista_categorias" class="sidebar-menu" data-widget="tree">
+            <li class="header"><h4 class="estilo_h4">CATÁLOGO</h4></li>
             <!-- Optionally, you can add icons to the links -->
             
             <?php for ($i=0; $i<count($familias); $i++) { ?>
@@ -81,6 +81,7 @@
             
         </ul>
         <!-- /.sidebar-menu -->
+
     </section>
     <!-- /.sidebar -->
 </aside>

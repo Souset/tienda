@@ -1,19 +1,19 @@
         <?php include("bd.php"); ?>
         
-        <header class="main-header">
+        <header style="position: fixed; top: 0; left: 0; right: 0;" class="main-header">
 
             <!-- Logo -->
             <a href="index.php" class="logo">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
-                <span class="logo-mini"><b>A</b>LT</span>
+                <span class="logo-mini"><img src="img/logo.png" alt=""></span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><b>Admin</b>LTE</span>
+                <span class="logo-lg"><img src="img/logo.png" alt=""> caja<b>LUZ</b></span>
             </a>
 
             <!-- Header Navbar -->
             <nav class="navbar navbar-static-top" role="navigation">
                 <!-- Sidebar toggle button-->
-                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button" onclick="quitar_clases_barra_lateral_izq();">
             <span class="sr-only">Toggle navigation</span>
             </a>
                 <!-- Navbar Right Menu -->
@@ -171,3 +171,15 @@
             </nav>
         </header>
             <!-- Fin header -->
+           
+<script>
+    function quitar_clases_barra_lateral_izq() {
+        var lista_categorias = document.getElementById("lista_categorias");
+        if (lista_categorias.style.position != "absolute") {
+            lista_categorias.style.position = "absolute";
+            lista_categorias.style.width = "100%";
+        } else {
+            lista_categorias.style.position = "";
+        }
+    }
+</script>
