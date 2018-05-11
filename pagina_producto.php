@@ -173,6 +173,7 @@ efecto deseado
                                     } else {
                                         $titulo_tonalidad = $producto[0]["titulo"];
                                     }
+                                    //$titulo_tonalidad_url = $titulo_tonalidad;
                                     if (strpos($titulo_tonalidad, ", Blanco ")) {
                                         $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, ", Blanco "));
                                         $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, ", Blanco "));
@@ -542,6 +543,8 @@ efecto deseado
                 var precio_total = document.getElementById("precio_total");
                 var precio = <?php echo $producto[0]["PVP"]; ?>;
                 precio_total.innerHTML = precio * cantidad.value + " €";
+                //history.replaceState(null, "", "producto <?php echo $titulo_tonalidad_url; ?>");
+                //alert("<?php echo $titulo_tonalidad_url; ?>");
             }
         </script>
     </body>
