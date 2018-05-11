@@ -229,3 +229,9 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.logo-lg{
+
+    width: 30px;
+    height: 30px;
+}
