@@ -363,7 +363,12 @@ efecto deseado
                                             <?php if ($producto[0]["certificados"] != "") { ?>
                                                 <tr>
                                                     <td>Certificados</td>
-                                                    <th><?php echo $producto[0]["certificados"]; ?></th>
+                                                    <?php $certificados = explode(", ", $producto[0]["certificados"]); ?>
+                                                    <th>
+                                                        <?php for ($i=0; $i<count($certificados); $i++) {
+                                                            echo "<p class='margen_bajo_0'>$certificados[$i]</p>" ;
+                                                        } ?>
+                                                    </th>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>
@@ -396,23 +401,51 @@ efecto deseado
                 <!-- INICIO ARTÍCULOS RELACIONADOS -->
                         <div class="col-md-4">
                             <h3 class="estilo_h3">TE PUEDE INTERESAR...</h3>
-                            <?php for($i=0; $i<count($familia_rel); $i++) { ?>
-                            <a href="pagina_producto.php?id=<?php echo $familia_rel[$i]["id"]; ?>">
-                                <div class="thumbnail targeta_peq">
-                                    <div class="row">
-                                        <div class="col-xs-4"><img src="<?php echo $familia_rel[$i]["imagen"]; ?>" class="imagen100"></div>
-                                        <div class="col-xs-8">
-                                            <div class="familia_titulo">
-                                                <?php echo $familia_rel[$i]["titulo"]; ?>
-                                            </div>
-                                            <div>
-                                                <h3 class="familia_precio">
-                                                    <?php echo $familia_rel[$i]["PVP"]; ?> €</h3>
+                            <?php
+                                for($i=0; $i<count($familia_rel); $i++) {
+                                    if (strpos($familia_rel[$i]["titulo"], ", regulable")) {
+                                        $titulo_tonalidad = substr($familia_rel[$i]["titulo"], 0, strpos($familia_rel[$i]["titulo"], ", regulable"));
+                                    } else {
+                                        $titulo_tonalidad = $familia_rel[$i]["titulo"];
+                                    }
+                                    if (strpos($titulo_tonalidad, ", Blanco ")) {
+                                        $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, ", Blanco "));
+                                        $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, ", Blanco "));
+                                    } elseif (strpos($titulo_tonalidad, " + Blanco ")) {
+                                        $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, " + Blanco "));
+                                        $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, " + Blanco "));
+                                    } else {
+                                        $titulo = $titulo_tonalidad;
+                                        $tonalidad = "";
+                                    }
+                                    switch ($tonalidad) {
+                                        case " + Blanco neutro":
+                                            $tonalidad = ", Blanco neutro";
+                                            break;
+                                        case " + Blanco frío":
+                                            $tonalidad = ", Blanco frío";
+                                            break;
+                                        case " + Blanco cálido":
+                                            $tonalidad = ", Blanco cálido";
+                                            break;
+                                    }
+                            ?>
+                                <a href="pagina_producto.php?id=<?php echo $familia_rel[$i]["id"]; ?>">
+                                    <div class="thumbnail targeta_peq">
+                                        <div class="row">
+                                            <div class="col-xs-4"><img src="<?php echo $familia_rel[$i]["imagen"]; ?>" class="imagen100"></div>
+                                            <div class="col-xs-8">
+                                                <div class="familia_titulo">
+                                                    <p><?php echo $titulo ?><small><?php echo $tonalidad ?></small></p>
+                                                </div>
+                                                <div>
+                                                    <h3 class="familia_precio">
+                                                        <?php echo $familia_rel[$i]["PVP"]; ?> €</h3>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
                             <?php } ?>
                             <div class="ver_mas">
                                 <a href="pagina_familia.php?familia=<?php echo $familia_subfamilia[0]["familia_id"] ?>" class="btn btn-lg btn-block btn-default">Ver más...</a>

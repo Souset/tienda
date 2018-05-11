@@ -17,7 +17,7 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 
         $sql = "SELECT id
                 FROM productos
-                WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%'";
+                WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%' OR codigo LIKE '$termino_buscar'";
         $productos = Query($sql);
         
         if (is_array($productos)) {
@@ -34,7 +34,7 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 
             $sql = "SELECT id, titulo, imagen, PVP
                     FROM productos
-                    WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%'
+                    WHERE titulo LIKE '%$termino_buscar%' OR subtitulo LIKE '%$termino_buscar%' OR codigo LIKE '$termino_buscar'
                     LIMIT $inicio, $productos_pagina";
             $productos = Query($sql);
 
