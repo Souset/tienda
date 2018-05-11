@@ -160,8 +160,8 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
-                <!-- FIN IMAGENES Nuevo Cambio de Cesar-->
-                
+                <!-- FIN IMAGENES Nuevo Cambio de Cesar lalalalla-->
+º                
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
                            
