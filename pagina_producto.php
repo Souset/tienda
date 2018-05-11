@@ -160,11 +160,7 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
-<<<<<<< HEAD
-                <!-- FIN IMAGENES Comentario de Joel nuevo nuevo nuevo-->
-=======
-                <!-- FIN IMAGENES Nuevo Cambio de Cesar-->
->>>>>>> César
+                <!-- FIN IMAGENES -->
                 
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
