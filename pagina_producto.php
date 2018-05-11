@@ -411,6 +411,9 @@ efecto deseado
                                 </div>
                             </a>
                             <?php } ?>
+                            <div class="ver_mas">
+                                <a href="pagina_familia.php?familia=<?php echo $familia_subfamilia[0]["familia_id"] ?>" class="btn btn-lg btn-block btn-default">Ver más...</a>
+                            </div>
                         </div>
                 <!-- FIN ARTÍCULOS RELACIONADOS -->
                    
