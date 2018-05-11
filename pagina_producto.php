@@ -160,7 +160,6 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
-                <!-- FIN IMAGENES Nuevo Cambio de Joel-->
                 <!-- FIN IMAGENES Nuevo Cambio de Cesar-->
                 
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
