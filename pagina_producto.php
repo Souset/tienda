@@ -27,6 +27,9 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
             $total_productos_familia_rel = count($familia_rel);
             $productos_pagina = 5;
             $inicio = 0;
+            if ($total_productos_familia_rel > $productos_pagina) {
+                $inicio = mt_rand(0, $total_productos_familia_rel-$productos_pagina);
+            }
 
             $sql = "SELECT titulo, imagen, PVP, id
                     FROM productos
