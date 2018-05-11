@@ -160,12 +160,16 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
+<<<<<<< HEAD
                 <!-- FIN IMAGENES Comentario de Joel nuevo nuevo nuevo-->
+=======
+                <!-- FIN IMAGENES Nuevo Cambio de Cesar-->
+>>>>>>> César
                 
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
                            
-                    <!-- INICIO TÍTULO Y PRECIO -->
+                    <!-- INICIO TÍTULO Y PRECIO  Comentario cesar 2-->
                             <div class="thumbnail margen_interno_20">
                                 <?php
                                     if (strpos($producto[0]["titulo"], ", regulable")) {
