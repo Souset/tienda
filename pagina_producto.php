@@ -160,7 +160,7 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
-                <!-- FIN IMAGENES Comentario de Joel nuevo nuevo nuevo-->
+                <!-- FIN IMAGENES -->
                 
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
