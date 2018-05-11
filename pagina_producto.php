@@ -160,7 +160,7 @@ efecto deseado
                                 </div>
                             </div>
                         </div>
-                <!-- FIN IMAGENES -->
+                <!-- FIN IMAGENES  Comentario César-->
 º                
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
