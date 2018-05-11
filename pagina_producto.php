@@ -156,7 +156,7 @@ efecto deseado
                                             <?php } ?>
                                         </ul>
                                     </div>
-                            <!-- FIN IMÁGENES PEQUEÑAS yeeeepa -->
+                            <!-- FIN IMÁGENES PEQUEÑAS  -->
                                 </div>
                             </div>
                         </div>
