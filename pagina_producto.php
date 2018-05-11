@@ -20,7 +20,7 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
         
         $sql = "SELECT id
                 FROM productos
-                WHERE familia = '$familia_producto' AND id % 50 = 0";
+                WHERE familia = '$familia_producto'";
         $familia_rel = Query($sql);
         
         if (is_array($familia_rel)) {
