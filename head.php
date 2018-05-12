@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="components/Ionicons/css/ionicons.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
-    <link rel="stylesheet" href="dist/css/estilos.css">
     <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect. -->
@@ -29,7 +28,6 @@
 
     <!-- Google Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
-    
+    <link rel="stylesheet" href="dist/css/estilos.css">
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
-    
 </head>

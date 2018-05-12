@@ -20,13 +20,16 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
         
         $sql = "SELECT id
                 FROM productos
-                WHERE familia = '$familia_producto' AND id % 50 = 0";
+                WHERE familia = '$familia_producto'";
         $familia_rel = Query($sql);
         
         if (is_array($familia_rel)) {
             $total_productos_familia_rel = count($familia_rel);
             $productos_pagina = 5;
             $inicio = 0;
+            if ($total_productos_familia_rel > $productos_pagina) {
+                $inicio = mt_rand(0, $total_productos_familia_rel-$productos_pagina);
+            }
 
             $sql = "SELECT titulo, imagen, PVP, id
                     FROM productos
@@ -153,7 +156,7 @@ efecto deseado
                                             <?php } ?>
                                         </ul>
                                     </div>
-                            <!-- FIN IMÁGENES PEQUEÑAS -->
+                            <!-- FIN IMÁGENES PEQUEÑAS  -->
                                 </div>
                             </div>
                         </div>
@@ -161,7 +164,7 @@ efecto deseado
                 
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
-                           
+
                     <!-- INICIO TÍTULO Y PRECIO -->
                             <div class="thumbnail margen_interno_20">
                                 <?php
@@ -360,7 +363,12 @@ efecto deseado
                                             <?php if ($producto[0]["certificados"] != "") { ?>
                                                 <tr>
                                                     <td>Certificados</td>
-                                                    <th><?php echo $producto[0]["certificados"]; ?></th>
+                                                    <?php $certificados = explode(", ", $producto[0]["certificados"]); ?>
+                                                    <th>
+                                                        <?php for ($i=0; $i<count($certificados); $i++) {
+                                                            echo "<p class='margen_bajo_0'>$certificados[$i]</p>" ;
+                                                        } ?>
+                                                    </th>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>
@@ -393,24 +401,55 @@ efecto deseado
                 <!-- INICIO ARTÍCULOS RELACIONADOS -->
                         <div class="col-md-4">
                             <h3 class="estilo_h3">TE PUEDE INTERESAR...</h3>
-                            <?php for($i=0; $i<count($familia_rel); $i++) { ?>
-                            <a href="pagina_producto.php?id=<?php echo $familia_rel[$i]["id"]; ?>">
-                                <div class="thumbnail targeta_peq">
-                                    <div class="row">
-                                        <div class="col-xs-4"><img src="<?php echo $familia_rel[$i]["imagen"]; ?>" class="imagen100"></div>
-                                        <div class="col-xs-8">
-                                            <div class="familia_titulo">
-                                                <?php echo $familia_rel[$i]["titulo"]; ?>
-                                            </div>
-                                            <div>
-                                                <h3 class="familia_precio">
-                                                    <?php echo $familia_rel[$i]["PVP"]; ?> €</h3>
+                            <?php
+                                for($i=0; $i<count($familia_rel); $i++) {
+                                    if (strpos($familia_rel[$i]["titulo"], ", regulable")) {
+                                        $titulo_tonalidad = substr($familia_rel[$i]["titulo"], 0, strpos($familia_rel[$i]["titulo"], ", regulable"));
+                                    } else {
+                                        $titulo_tonalidad = $familia_rel[$i]["titulo"];
+                                    }
+                                    if (strpos($titulo_tonalidad, ", Blanco ")) {
+                                        $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, ", Blanco "));
+                                        $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, ", Blanco "));
+                                    } elseif (strpos($titulo_tonalidad, " + Blanco ")) {
+                                        $titulo = substr($titulo_tonalidad, 0, strpos($titulo_tonalidad, " + Blanco "));
+                                        $tonalidad = substr($titulo_tonalidad, strpos($titulo_tonalidad, " + Blanco "));
+                                    } else {
+                                        $titulo = $titulo_tonalidad;
+                                        $tonalidad = "";
+                                    }
+                                    switch ($tonalidad) {
+                                        case " + Blanco neutro":
+                                            $tonalidad = ", Blanco neutro";
+                                            break;
+                                        case " + Blanco frío":
+                                            $tonalidad = ", Blanco frío";
+                                            break;
+                                        case " + Blanco cálido":
+                                            $tonalidad = ", Blanco cálido";
+                                            break;
+                                    }
+                            ?>
+                                <a href="pagina_producto.php?id=<?php echo $familia_rel[$i]["id"]; ?>">
+                                    <div class="thumbnail targeta_peq">
+                                        <div class="row">
+                                            <div class="col-xs-4"><img src="<?php echo $familia_rel[$i]["imagen"]; ?>" class="imagen100"></div>
+                                            <div class="col-xs-8">
+                                                <div class="familia_titulo">
+                                                    <p><?php echo $titulo ?><small><?php echo $tonalidad ?></small></p>
+                                                </div>
+                                                <div>
+                                                    <h3 class="familia_precio">
+                                                        <?php echo $familia_rel[$i]["PVP"]; ?> €</h3>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
                             <?php } ?>
+                            <div class="ver_mas">
+                                <a href="pagina_familia.php?familia=<?php echo $familia_subfamilia[0]["familia_id"] ?>" class="btn btn-lg btn-block btn-default">Ver más...</a>
+                            </div>
                         </div>
                 <!-- FIN ARTÍCULOS RELACIONADOS -->
                    
@@ -441,6 +480,7 @@ efecto deseado
       experiencia de usuario. -->
     
         <script>
+            //  AL CARGAR EL DOCUMENTO - JQUERY (SLIDER IMAGENES)
             $(document).ready(function() {
                 $('#myCarousel').carousel({
                     interval: null
@@ -465,9 +505,24 @@ efecto deseado
                 });
             });
             
-            function restar1(precio, stock) {
+        //  AL CARGAR EL DOCUMENTO CALCULA EL PRECIO
+            window.onload = function() {
                 var cantidad = document.getElementById("cantidad");
                 var precio_total = document.getElementById("precio_total");
+                var precio = <?php echo $producto[0]["PVP"]; ?>;
+                precio_total.innerHTML = precio * cantidad.value + " €";
+
+                if (document.documentElement.clientWidth <= 767) {
+                    barra_lateral_izq.style = "";
+                    barra_lateral_izq_scroll.style = "";
+                }
+
+                //  CAMBIAR LA URL DEL NAVEGADOR CON JAVASCRIPT SIN RECARGAR LA PAGINA
+                //history.replaceState(null, "", "url_nueva.php");
+            }
+
+        //  PARA CALCULAR PRECIO AL DARLE A BOTONES
+            function restar1(precio, stock) {
                 if (cantidad.value > 1) {
                     cantidad.value--;
                     precio_total.innerHTML = precio * cantidad.value + " €";
@@ -475,17 +530,15 @@ efecto deseado
             }
             
             function sumar1(precio, stock) {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
                 if (cantidad.value < stock) {
                     cantidad.value++;
                     precio_total.innerHTML = precio * cantidad.value + " €";
                 }
             }
             
+        // PARA CALCULAR PRECIO CUANDO EL INPUT PIERDE EL FOCO
             function calcular(precio, stock) {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
+                cantidad.value = parseInt(cantidad.value);
                 if (cantidad.value > stock) {
                     cantidad.value = stock;
                 }
@@ -495,13 +548,9 @@ efecto deseado
                 if (stock == 0) {
                     cantidad.value = 0;
                 }
-                precio_total.innerHTML = precio * cantidad.value + " €";
-            }
-            
-            window.onload=function() {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
-                var precio = <?php echo $producto[0]["PVP"]; ?>;
+                if (isNaN(cantidad.value)) {
+                    cantidad.value = 1;
+                }
                 precio_total.innerHTML = precio * cantidad.value + " €";
             }
         </script>
