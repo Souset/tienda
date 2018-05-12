@@ -1,18 +1,18 @@
 .targeta_precio {
-    font-size: 1.5em;
     color: #3c8dbc;
-    text-align: center;
+    font-size: 1.5em;
     margin: 0;
     padding: 0;
+    text-align: center;
 }
 
 .targeta_titulo {
-    height: 70px;
     color: #2c3b41;
-    text-align: center;
     font-size: 1.2em;
-    overflow: hidden;
+    height: 70px;
     margin: 0;
+    overflow: hidden;
+    text-align: center;
 }
 
 .imagen100 {
@@ -20,16 +20,16 @@
 }
 
 .producto_precio_sin_IVA {
-    padding: 0;
     margin: 0;
     margin-bottom: -7px;
+    padding: 0;
 }
 
 .producto_precio {
-    padding: 0;
-    margin: 0;
     color: #3c8dbc;
     font-weight: bold;
+    margin: 0;
+    padding: 0;
 }
 
 .texto_gris {
@@ -46,9 +46,9 @@
 }
 
 .familia_precio {
-    margin-top: 5px;
     color: #89d7ed;
     font-weight: bold;
+    margin-top: 5px;
 }
 
 .margen_interno_20 {
@@ -61,9 +61,9 @@
 }
 
 .mas_detalles:hover {
-    filter: brightness(100%);
     border-radius: 4px;
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
+    filter: brightness(100%);
 }
 
 .mas_detalles:hover .targeta_titulo {
@@ -96,19 +96,19 @@
 }
 
 .nav-pills div li[data-slide-to="0"].active img {
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
 }
 
 .nav-pills div li[data-slide-to="1"].active img {
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
 }
 
 .nav-pills div li[data-slide-to="2"].active img {
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
 }
 
 .nav-pills div li[data-slide-to="3"].active img {
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
 }
 
 .texto_verde {
@@ -120,24 +120,24 @@
 }
 
 .blanco_neutro {
-    padding: 5px;
-    border-radius: 4px;
     background-color: #2c3b41;
+    border-radius: 4px;
     color: white;
+    padding: 5px;
 }
 
 .blanco_frio {
-    padding: 5px;
-    border-radius: 4px;
     background-color: #2c3b41;
+    border-radius: 4px;
     color: #89d7ed;
+    padding: 5px;
 }
 
 .blanco_calido {
-    padding: 5px;
-    border-radius: 4px;
     background-color: #2c3b41;
+    border-radius: 4px;
     color: yellow;
+    padding: 5px;
 }
 
 .estilo_hr {
@@ -145,17 +145,17 @@
 }
 
 .estilo_h3 {
-    margin-top: 0px;
-    text-align: center;
     font-size: 1.3em;
     font-weight: bold;
+    margin-top: 0;
+    text-align: center;
 }
 
 .estilo_h4 {
-    margin: 7px;
-    text-align: center;
     font-size: 1.5em;
     font-weight: bold;
+    margin: 7px;
+    text-align: center;
 }
 
 .margen_bajo_0 {
@@ -181,16 +181,16 @@
 }
 
 .mas_menos h4 {
-    text-align: right;
+    color: #3c8dbc;
     font-size: 1.7em;
     font-weight: bold;
-    color: #3c8dbc;
     margin-top: 5px;
+    text-align: right;
 }
 
 .logo img {
-    width:30px;
     margin-top:-7px;
+    width:30px;
 }
 
 .centrado {
@@ -198,8 +198,8 @@
 }
 
 #pagina, #pagina_boton {
-    width: 70px;
     text-align: center;
+    width: 70px;
 }
 
 .ocultar {
@@ -230,13 +230,14 @@
 }
 
 .treeview-menu li a {
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.login-page{ 
-    background-color: rgba(60, 141, 188, 0.8); 
+.login-page{
+    background-color: rgb(60, 141, 188);
+    background-color: rgba(60, 141, 188, 0.8);
 } 
  
 .login-logo a{ 
@@ -245,5 +246,5 @@
 }
 
 .login-box-body {
-    box-shadow: 0px 0px 13px 0px rgba(0,0,0,0.75);
+    box-shadow: 0 0 13px 0 rgba(0,0,0,0.75);
 }
