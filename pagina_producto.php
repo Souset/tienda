@@ -99,7 +99,7 @@ efecto deseado
 
         <!-- INICIO CONTENIDO PRINCIPAL -->
                 <section class="content container-fluid">
-
+<div><button type="button" onclick="javascript:document.location.href = 'crear_pdf.php?id=<?php echo $producto[0]["id"]; ?>'">Crear PDF</button></div>
             <!-- INICIO ZONA SUPERIOR -->
                     <div class="row">
                     
