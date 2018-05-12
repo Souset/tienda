@@ -104,8 +104,10 @@
         if (lista_categorias.style.position != "absolute") {
             lista_categorias.style.position = "absolute";
             lista_categorias.style.width = "100%";
+            //$("#lista_categorias li").css("height", "30px");
         } else {
             lista_categorias.style.position = "";
+            //$("#lista_categorias li").css("height", "100%");
         }
     }
 </script>
