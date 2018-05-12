@@ -210,10 +210,6 @@
     padding-right: 20px;
 }
 
-body {
-    margin-top: 50px;
-}
-
 #barra_lateral_izq_scroll::-webkit-scrollbar {
       display: none;
 }
@@ -221,6 +217,15 @@ body {
 @media (max-width: 767px) {
     .pagination a {
         margin: 3px 5px;
+    }
+    body {
+        margin-top: 100px;
+    }
+}
+
+@media (min-width: 768px) {
+    body {
+        margin-top: 50px;
     }
 }
 
