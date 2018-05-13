@@ -171,15 +171,3 @@
             </nav>
         </header>
             <!-- Fin header -->
-           
-<script>
-    function quitar_clases_barra_lateral_izq() {
-        var lista_categorias = document.getElementById("lista_categorias");
-        if (lista_categorias.style.position != "absolute") {
-            lista_categorias.style.position = "absolute";
-            lista_categorias.style.width = "100%";
-        } else {
-            lista_categorias.style.position = "";
-        }
-    }
-</script>

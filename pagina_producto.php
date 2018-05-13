@@ -156,15 +156,16 @@ efecto deseado
                                             <?php } ?>
                                         </ul>
                                     </div>
-                            <!-- FIN IMÁGENES PEQUEÑAS -->
+                            <!-- FIN IMÁGENES PEQUEÑAS  -->
+                                  
                                 </div>
                             </div>
                         </div>
-                <!-- FIN IMAGENES  Comentario César-->
-º                
+                <!-- FIN IMAGENES  -->
+                
                 <!-- INICIO TÍTULO, PRECIO, TABLA... -->
                         <div class="col-md-6">
-                           
+
                     <!-- INICIO TÍTULO Y PRECIO -->
                             <div class="thumbnail margen_interno_20">
                                 <?php
@@ -480,6 +481,7 @@ efecto deseado
       experiencia de usuario. -->
     
         <script>
+            //  AL CARGAR EL DOCUMENTO - JQUERY (SLIDER IMAGENES)
             $(document).ready(function() {
                 $('#myCarousel').carousel({
                     interval: null
@@ -504,9 +506,24 @@ efecto deseado
                 });
             });
             
-            function restar1(precio, stock) {
+        //  AL CARGAR EL DOCUMENTO CALCULA EL PRECIO
+            window.onload = function() {
                 var cantidad = document.getElementById("cantidad");
                 var precio_total = document.getElementById("precio_total");
+                var precio = <?php echo $producto[0]["PVP"]; ?>;
+                precio_total.innerHTML = precio * cantidad.value + " €";
+
+                if (document.documentElement.clientWidth <= 767) {
+                    barra_lateral_izq.style = "";
+                    barra_lateral_izq_scroll.style = "";
+                }
+
+                //  CAMBIAR LA URL DEL NAVEGADOR CON JAVASCRIPT SIN RECARGAR LA PAGINA
+                //history.replaceState(null, "", "url_nueva.php");
+            }
+
+        //  PARA CALCULAR PRECIO AL DARLE A BOTONES
+            function restar1(precio, stock) {
                 if (cantidad.value > 1) {
                     cantidad.value--;
                     precio_total.innerHTML = precio * cantidad.value + " €";
@@ -514,17 +531,15 @@ efecto deseado
             }
             
             function sumar1(precio, stock) {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
                 if (cantidad.value < stock) {
                     cantidad.value++;
                     precio_total.innerHTML = precio * cantidad.value + " €";
                 }
             }
             
+        // PARA CALCULAR PRECIO CUANDO EL INPUT PIERDE EL FOCO
             function calcular(precio, stock) {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
+                cantidad.value = parseInt(cantidad.value);
                 if (cantidad.value > stock) {
                     cantidad.value = stock;
                 }
@@ -534,17 +549,10 @@ efecto deseado
                 if (stock == 0) {
                     cantidad.value = 0;
                 }
+                if (isNaN(cantidad.value)) {
+                    cantidad.value = 1;
+                }
                 precio_total.innerHTML = precio * cantidad.value + " €";
-            }
-            
-            window.onload=function() {
-                var cantidad = document.getElementById("cantidad");
-                var precio_total = document.getElementById("precio_total");
-                var precio = <?php echo $producto[0]["PVP"]; ?>;
-                precio_total.innerHTML = precio * cantidad.value + " €";
-        
-        //  CAMBIAR LA URL DEL NAVEGADOR CON JAVASCRIPT
-                //history.replaceState(null, "", "url_nueva.php");
             }
         </script>
     </body>

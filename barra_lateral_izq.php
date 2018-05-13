@@ -85,3 +85,29 @@
     </section>
     <!-- /.sidebar -->
 </aside>
+
+
+<script>
+//  AL CARGAR EL DOCUMENTO CAMBIA ESTILOS SEGUN EL ANCHO DE LA VENTANA
+    window.onload = function() {
+        if (document.documentElement.clientWidth <= 767) {
+            var barra_lateral_izq = document.getElementById("barra_lateral_izq");
+            var barra_lateral_izq_scroll = document.getElementById("barra_lateral_izq_scroll");
+            barra_lateral_izq.style = "";
+            barra_lateral_izq_scroll.style = "";
+        }
+    }
+
+//  AL HACER CLICK EN EL BOTON QUE OCULTA LA BARRA LATERAL IZQ CAMBIA CLASES DE LA LISTA DE CATEGORIAS
+    function quitar_clases_barra_lateral_izq() {
+        var lista_categorias = document.getElementById("lista_categorias");
+        if (lista_categorias.style.position != "absolute") {
+            lista_categorias.style.position = "absolute";
+            lista_categorias.style.width = "100%";
+            //$("#lista_categorias li").css("height", "30px");
+        } else {
+            lista_categorias.style.position = "";
+            //$("#lista_categorias li").css("height", "100%");
+        }
+    }
+</script>

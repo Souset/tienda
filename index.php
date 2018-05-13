@@ -217,6 +217,7 @@ efecto deseado
       experiencia de usuario. -->
       
     <script>
+    //  FORMULARIO PARA LA PAGINACION
         function ir_a_pagina(total_paginas) {
             var pagina = document.getElementById("pagina");
             pagina.value = parseInt(pagina.value);
