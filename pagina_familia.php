@@ -8,18 +8,26 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 <?php include_once("header.php")?>
 
 <?php
-    $familia_id = $_GET["familia"];
+    $familia_id = limpiarEnteroGet("familia", 0);
+    if ($familia_id <= 0) {
+        header("Location: index.php");
+        exit;
+    }
     $sql = "SELECT id
             FROM productos
             WHERE familia = '$familia_id'";
     $productos = Query($sql);
     
+    $total_productos = 0;
+    $productos_pagina = 16;
+    $pagina = 1;
+    $total_paginas = 1;
     if (is_array($productos)) {
         $total_productos = count($productos);
         $productos_pagina = 16;
     
         if(isset($_GET["pagina"])){
-            $pagina=$_GET["pagina"];
+            $pagina=max(1, (int)$_GET["pagina"]);
             $inicio = ($pagina - 1) * $productos_pagina;
         } else {
             $inicio = 0;

@@ -45,7 +45,8 @@
                     $menu_abierto = "";
                     $familia_abierta = "";
                     $id_familia = $familias[$i]["id"];
-                    if (strpos($_SERVER["PHP_SELF"], "pagina_subfamilia.php") && $id_familia == $familia[0]["id"] || strpos($_SERVER["PHP_SELF"], "pagina_familia.php") && $id_familia == $familia[0]["id"] || strpos($_SERVER["PHP_SELF"], "pagina_producto.php") && $id_familia == $familia[0]["id"]) {
+                    $familiaActualId = isset($familia[0]["id"]) ? (int)$familia[0]["id"] : 0;
+                    if ((strpos($_SERVER["PHP_SELF"], "pagina_subfamilia.php") && $id_familia == $familiaActualId) || (strpos($_SERVER["PHP_SELF"], "pagina_familia.php") && $id_familia == $familiaActualId) || (strpos($_SERVER["PHP_SELF"], "pagina_producto.php") && $id_familia == $familiaActualId)) {
                         $familia_abierta = "style='display: block'";
                         $menu_abierto = "menu-open";
                     }

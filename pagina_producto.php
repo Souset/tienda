@@ -8,13 +8,18 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 <?php include_once("header.php")?>
 
 <?php
-    if (isset($_GET["id"])) {
-        $id = $_GET["id"];
+    $id = limpiarEnteroGet("id", 0);
+    $producto = array();
+    $familia_rel = array();
+    $familia_subfamilia = array();
+    if ($id > 0) {
         $sql = "SELECT *
                 FROM productos
                 WHERE id = '$id'";
         $producto = Query($sql);
-        
+    }
+
+    if (!empty($producto)) {
         $familia_producto = $producto[0]["familia"];
         $subfamilia_producto = $producto[0]["subfamilia"];
         
@@ -48,7 +53,7 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
                 FROM productos, familia, subfamilia
                 WHERE productos.familia = familia.id AND productos.subfamilia = subfamilia.id AND productos.id = '$id'";
         $familia_subfamilia = Query($sql);
-    }
+    } 
 ?>
 
     <?php include_once("barra_lateral_izq.php")?>
@@ -84,12 +89,16 @@ efecto deseado
                
         <!--  INICIO FAMILIA Y SUBFAMILIA (MIGA DE PAN) -->
                 <section class="content-header">
-                    <h1>
-                        <a href="pagina_familia.php?familia=<?php echo $familia_subfamilia[0]["familia_id"] ?>">
-                            <?php echo $familia_subfamilia[0]["familia"] ?>
-                        </a>
-                        <small><a href="pagina_subfamilia.php?subfamilia=<?php echo $familia_subfamilia[0]["subfamilia_id"] ?>"><?php echo $familia_subfamilia[0]["subfamilia"] ?></a></small>
-                    </h1>
+                    <?php if (!empty($familia_subfamilia)) { ?>
+                        <h1>
+                            <a href="pagina_familia.php?familia=<?php echo $familia_subfamilia[0]["familia_id"] ?>">
+                                <?php echo $familia_subfamilia[0]["familia"] ?>
+                            </a>
+                            <small><a href="pagina_subfamilia.php?subfamilia=<?php echo $familia_subfamilia[0]["subfamilia_id"] ?>"><?php echo $familia_subfamilia[0]["subfamilia"] ?></a></small>
+                        </h1>
+                    <?php } else { ?>
+                        <h1>Producto no encontrado</h1>
+                    <?php } ?>
                     <ol class="breadcrumb">
                         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
                         <li class="active">Here</li>
@@ -99,6 +108,11 @@ efecto deseado
 
         <!-- INICIO CONTENIDO PRINCIPAL -->
                 <section class="content container-fluid">
+                    <?php if (empty($producto)) { ?>
+                        <div class="alert alert-warning">
+                            El producto solicitado no existe o no está disponible.
+                        </div>
+                    <?php } else { ?>
 
             <!-- INICIO ZONA SUPERIOR -->
                     <div class="row">
@@ -266,9 +280,15 @@ efecto deseado
                                         <h4 id="precio_total"><!-- SE GENERA CON JAVASCRIPT --></h4>
                                     </div>
                                 </div>
-                                <div>
-                                    <button type="button" class="btn btn-lg btn-block btn-primary">Añadir al carrito</button>
-                                </div>
+                                <form method="post" action="carrito.php?accion=add">
+                                    <input type="hidden" name="producto_id" value="<?php echo (int)$producto[0]["id"]; ?>">
+                                    <input type="hidden" id="cantidad_hidden" name="cantidad" value="1">
+                                    <div>
+                                        <button type="submit" class="btn btn-lg btn-block btn-primary" <?php if ((int)$producto[0]["stock"] === 0) { echo "disabled"; } ?>>
+                                            Añadir al carrito
+                                        </button>
+                                    </div>
+                                </form>
                         <!-- FIN SELECCIÓN DE CANTIDAD -->
                                 
                                 <hr class="estilo_hr">
@@ -455,6 +475,7 @@ efecto deseado
                    
                     </div>
             <!-- FIN ZONA INFERIOR -->
+                    <?php } ?>
 
                 </section>
         <!-- FIN CONTENIDO PRINCIPAL -->
@@ -480,6 +501,7 @@ efecto deseado
       experiencia de usuario. -->
     
         <script>
+            <?php if (!empty($producto)) { ?>
             //  AL CARGAR EL DOCUMENTO - JQUERY (SLIDER IMAGENES)
             $(document).ready(function() {
                 $('#myCarousel').carousel({
@@ -525,6 +547,7 @@ efecto deseado
             function restar1(precio, stock) {
                 if (cantidad.value > 1) {
                     cantidad.value--;
+                    document.getElementById("cantidad_hidden").value = cantidad.value;
                     precio_total.innerHTML = precio * cantidad.value + " €";
                 }
             }
@@ -532,6 +555,7 @@ efecto deseado
             function sumar1(precio, stock) {
                 if (cantidad.value < stock) {
                     cantidad.value++;
+                    document.getElementById("cantidad_hidden").value = cantidad.value;
                     precio_total.innerHTML = precio * cantidad.value + " €";
                 }
             }
@@ -551,8 +575,10 @@ efecto deseado
                 if (isNaN(cantidad.value)) {
                     cantidad.value = 1;
                 }
+                document.getElementById("cantidad_hidden").value = cantidad.value;
                 precio_total.innerHTML = precio * cantidad.value + " €";
             }
+            <?php } ?>
         </script>
     </body>
 

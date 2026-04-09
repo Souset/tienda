@@ -21,12 +21,15 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
             WHERE id % 100 = 0";
     $productos = Query($sql);
 
+    $total_productos = 0;
+    $productos_pagina = 16;
+    $pagina = 1;
+    $total_paginas = 1;
     if (is_array($productos)) {
         $total_productos = count($productos);
-        $productos_pagina = 16;
     
         if(isset($_GET["pagina"])){
-            $pagina=$_GET["pagina"];
+            $pagina=max(1, (int)$_GET["pagina"]);
             $inicio = ($pagina - 1) * $productos_pagina;
         } else {
             $inicio = 0;

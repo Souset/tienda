@@ -1,4 +1,13 @@
-        <?php include("bd.php"); ?>
+<?php
+include("bd.php");
+iniciarSesionSiNoExiste();
+$cantidadCarrito = 0;
+if (isset($_SESSION["carrito"]) && is_array($_SESSION["carrito"])) {
+    foreach ($_SESSION["carrito"] as $cantidadProducto) {
+        $cantidadCarrito += (int)$cantidadProducto;
+    }
+}
+?>
         
         <header style="position: fixed; top: 0; left: 0; right: 0;" class="main-header">
 
@@ -163,6 +172,14 @@
                             </ul>
                         </li>
                         <!-- Control Sidebar Toggle Button -->
+                        <li>
+                            <a href="carrito.php" title="Carrito">
+                                <i class="fa fa-shopping-cart"></i>
+                                <?php if ($cantidadCarrito > 0) { ?>
+                                    <span class="label label-primary"><?php echo $cantidadCarrito; ?></span>
+                                <?php } ?>
+                            </a>
+                        </li>
                         <li>
                             <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
                         </li>
