@@ -8,7 +8,11 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 <?php include_once("header.php")?>
 
 <?php
-    $subfamilia_id = $_GET["subfamilia"];
+    $subfamilia_id = limpiarEnteroGet("subfamilia", 0);
+    if ($subfamilia_id <= 0) {
+        header("Location: index.php");
+        exit;
+    }
     $sql = "SELECT id
             FROM productos
             WHERE subfamilia = '$subfamilia_id'";
@@ -19,7 +23,7 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
         $productos_pagina = 16;
     
         if(isset($_GET["pagina"])){
-            $pagina=$_GET["pagina"];
+            $pagina=max(1, (int)$_GET["pagina"]);
             $inicio = ($pagina - 1) * $productos_pagina;
         } else {
             $inicio = 0;
@@ -40,12 +44,18 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
             WHERE id = '$subfamilia_id'";
     $subfamilia = Query($sql);
     
-    $familia_fk = $subfamilia[0]["familia_fk"];
+    $familia_fk = !empty($subfamilia) ? (int)$subfamilia[0]["familia_fk"] : 0;
     
      $sql = "SELECT id, familia
              FROM familia
              WHERE id = '$familia_fk'";
     $familia = Query($sql);
+    if (empty($familia)) {
+        $familia = array(array("id" => 0, "familia" => "Sin familia"));
+    }
+    if (empty($subfamilia)) {
+        $subfamilia = array(array("id" => 0, "subfamilia" => "Sin subfamilia"));
+    }
 ?>
 
 <?php include_once("barra_lateral_izq.php")?>

@@ -9,8 +9,15 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
 
 <?php
 
-    if(isset($_GET["buscar"])){
-        $termino_buscar = $_GET["buscar"];
+    $productos = array();
+    $total_productos = 0;
+    $productos_pagina = 16;
+    $total_paginas = 1;
+    $pagina = 1;
+    $termino_buscar = isset($_GET["buscar"]) ? trim($_GET["buscar"]) : "";
+
+    if($termino_buscar !== ""){
+        $termino_buscar = escapeTexto($termino_buscar);
 
         /*$sql = "SELECT * FROM productos WHERE titulo LIKE '%termino_buscar%'";
         $productos = Query($sql);*/
@@ -22,10 +29,9 @@ rasguño. Esta página elimina todos los enlaces y proporciona solo el marcado n
         
         if (is_array($productos)) {
             $total_productos = count($productos);
-            $productos_pagina = 16;
 
             if(isset($_GET["pagina"])){
-                $pagina=$_GET["pagina"];
+                $pagina=max(1, (int)$_GET["pagina"]);
                 $inicio = ($pagina - 1) * $productos_pagina;
             } else {
                 $inicio = 0;
