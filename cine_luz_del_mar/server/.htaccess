@@ -1,0 +1,16 @@
+# Protección de la mini-API de Cine Luz del Mar (Apache / hosting Nicalia).
+
+# La librería interna nunca se sirve por HTTP.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^lib/ - [F,L]
+</IfModule>
+
+# Pasar la cabecera Authorization a PHP (algunos hostings la eliminan).
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# Sin listado de directorios.
+Options -Indexes

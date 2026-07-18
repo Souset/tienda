@@ -1,0 +1,19 @@
+# Los archivos subidos se sirven como estáticos: nunca ejecutar PHP aquí.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8
+RemoveType .php .phtml
+
+# Solo se sirven los tipos permitidos.
+<FilesMatch "\.(?!(jpg|jpeg|png|webp|pdf)$)[^.]+$">
+  Require all denied
+</FilesMatch>
+
+# Cache larga para imágenes (los nombres son aleatorios e inmutables).
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 year"
+</IfModule>
+
+Options -Indexes
