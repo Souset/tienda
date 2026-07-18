@@ -1,0 +1,13 @@
+{
+  "name": "cine-luz-del-mar-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Scripts de administración: bootstrap del primer admin y datos de ejemplo",
+  "scripts": {
+    "bootstrap-admin": "node bootstrap_admin.mjs",
+    "seed": "node seed.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}
