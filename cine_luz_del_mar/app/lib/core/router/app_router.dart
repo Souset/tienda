@@ -5,7 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../features/admin/presentation/screens/admin_screen.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/chat/presentation/screens/chat_list_screen.dart';
 import '../../features/community/presentation/screens/community_screen.dart';
 import '../../features/films/presentation/screens/films_screen.dart';
@@ -18,6 +22,7 @@ import '../../features/notifications/presentation/screens/notifications_screen.d
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import 'app_shell.dart';
+import 'router_refresh.dart';
 
 /// Nombres de ruta centralizados para navegación tipada por nombre.
 abstract final class AppRoutes {
@@ -36,14 +41,61 @@ abstract final class AppRoutes {
   static const map = '/mapa';
   static const assistant = '/asistente';
   static const admin = '/admin';
+  static const register = '/acceso/registro';
+  static const forgotPassword = '/acceso/recuperar';
+  static const verifyEmail = '/acceso/verificar';
 }
 
+/// Rutas que exigen sesión iniciada.
+const _protectedRoutes = <String>{
+  AppRoutes.memberCard,
+  AppRoutes.chat,
+  AppRoutes.notifications,
+  AppRoutes.assistant,
+};
+
 final routerProvider = Provider<GoRouter>((ref) {
-  // El guard de autenticación y roles se conecta en la fase de Auth:
-  // redirige a /acceso cuando la ruta lo exige y no hay sesión válida.
+  final refresh = GoRouterRefreshStream();
+  ref.onDispose(refresh.dispose);
+
   return GoRouter(
     initialLocation: AppRoutes.home,
     debugLogDiagnostics: false,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final session = ref.read(sessionProvider);
+      final user = session.value;
+      final loggedIn = user != null;
+      final location = state.matchedLocation;
+
+      final isVerifyEmail = location == AppRoutes.verifyEmail;
+      // El grupo /acceso (login, registro, recuperar) es solo para invitados;
+      // /acceso/verificar es la excepción: requiere sesión.
+      final isAuthGroup =
+          location.startsWith(AppRoutes.login) && !isVerifyEmail;
+
+      // La verificación de correo solo tiene sentido con sesión activa.
+      if (isVerifyEmail && !loggedIn) return AppRoutes.login;
+
+      // Con sesión, las pantallas de acceso redirigen al inicio.
+      if (loggedIn && isAuthGroup) return AppRoutes.home;
+
+      // Rutas protegidas: exigen sesión.
+      if (!loggedIn && _protectedRoutes.contains(location)) {
+        return AppRoutes.login;
+      }
+
+      // Panel de administración: sesión + rol coordinador o superior. Si la
+      // sesión aún está cargando dejamos pasar y la propia pantalla valida.
+      if (location == AppRoutes.admin) {
+        if (!loggedIn) return AppRoutes.login;
+        if (session.hasValue && !user.userRole.canManageContent) {
+          return AppRoutes.home;
+        }
+      }
+
+      return null;
+    },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -99,6 +151,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyEmail,
+        builder: (context, state) => const VerifyEmailScreen(),
       ),
       GoRoute(
         path: AppRoutes.news,
