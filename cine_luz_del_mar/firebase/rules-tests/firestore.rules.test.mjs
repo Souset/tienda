@@ -407,6 +407,45 @@ describe('configuración', () => {
   });
 });
 
+describe('consultas de listado', () => {
+  it('socio lista el feed completo sin filtro de visibilidad', () =>
+    assertSucceeds(
+      getDocs(
+        query(collection(ctx('socio-1'), 'posts'), where('visibility', 'in', ['public', 'members'])),
+      ),
+    ).then(() => assertSucceeds(getDocs(collection(ctx('socio-1'), 'posts')))));
+
+  it('invitado solo lista posts públicos (con filtro); sin filtro se deniega', async () => {
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(ctx('invit-1'), 'posts'),
+          where('visibility', '==', 'public'),
+        ),
+      ),
+    );
+    await assertFails(getDocs(collection(ctx('invit-1'), 'posts')));
+  });
+
+  it('coordinador lista toda la biblioteca sin filtro de minRole', () =>
+    assertSucceeds(getDocs(collection(ctx('coord-1'), 'library'))));
+
+  it('socio lista biblioteca filtrando por sus niveles legibles', () =>
+    assertSucceeds(
+      getDocs(
+        query(
+          collection(ctx('socio-1'), 'library'),
+          where('minRole', 'in', ['invitado', 'socio']),
+        ),
+      ),
+    ));
+
+  it('coordinador lista noticias y eventos sin filtro de estado', async () => {
+    await assertSucceeds(getDocs(collection(ctx('coord-1'), 'news')));
+    await assertSucceeds(getDocs(collection(ctx('coord-1'), 'events')));
+  });
+});
+
 describe('rutas no contempladas', () => {
   it('cualquier colección desconocida está cerrada', async () => {
     await assertFails(

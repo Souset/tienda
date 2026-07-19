@@ -60,6 +60,9 @@ const _protectedRoutes = <String>{
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = GoRouterRefreshStream();
   ref.onDispose(refresh.dispose);
+  // El redirect debe re-evaluarse también cuando termina de cargar el perfil
+  // de Firestore (rol incluido), no solo con authStateChanges.
+  ref.listen(sessionProvider, (_, _) => refresh.notify());
 
   return GoRouter(
     initialLocation: AppRoutes.home,
@@ -70,6 +73,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final user = session.value;
       final loggedIn = user != null;
       final location = state.matchedLocation;
+
+      // Mientras la sesión se restaura (recarga en web), no expulsar de las
+      // rutas protegidas: cada pantalla gestiona su propio estado de carga.
+      if (session.isLoading && !session.hasValue) return null;
 
       final isVerifyEmail = location == AppRoutes.verifyEmail;
       // El grupo /acceso (login, registro, recuperar) es solo para invitados;

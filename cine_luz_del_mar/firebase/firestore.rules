@@ -160,9 +160,10 @@ service cloud.firestore {
     // ---------- Comunidad ----------
 
     match /posts/{postId} {
-      allow read: if resource.data.visibility == 'public'
-        ? isSignedIn()
-        : hasRank(2);
+      // Forma OR (no ternaria) para que las consultas de listado sin filtro
+      // de visibilidad sean demostrables para socio+.
+      allow read: if hasRank(2)
+        || (isSignedIn() && resource.data.visibility == 'public');
 
       allow create: if hasRank(2)
         && isVerified()
@@ -234,7 +235,9 @@ service cloud.firestore {
     // ---------- Biblioteca ----------
 
     match /library/{id} {
-      allow read: if roleRank(myRole()) >= roleRank(resource.data.minRole);
+      // coordinador+ primero: permite listados sin filtro de minRole.
+      allow read: if hasRank(3)
+        || roleRank(myRole()) >= roleRank(resource.data.minRole);
       allow create, update, delete: if hasRank(3);
     }
 

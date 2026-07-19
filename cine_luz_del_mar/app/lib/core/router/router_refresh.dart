@@ -22,6 +22,9 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
   StreamSubscription<User?>? _subscription;
 
+  /// Fuerza una reevaluación del redirect (p. ej. al emitir sessionProvider).
+  void notify() => notifyListeners();
+
   @override
   void dispose() {
     _subscription?.cancel();

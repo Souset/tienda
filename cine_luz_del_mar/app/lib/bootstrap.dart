@@ -32,9 +32,11 @@ Future<void> bootstrap(Widget Function() builder) async {
 
 Future<void> _initFirebase() async {
   try {
+    // En web el SDK JS se descarga dinámicamente: si la red lo impide, la
+    // app arranca igualmente en vez de quedarse en blanco.
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    );
+    ).timeout(const Duration(seconds: 12));
     if (AppConfig.useEmulators) {
       await FirebaseAuth.instance.useAuthEmulator(
         AppConfig.emulatorHost,
