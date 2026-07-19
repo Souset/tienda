@@ -273,7 +273,7 @@ abstract final class AppTheme {
 
   /// Estilo caligráfico de marca (logo "Cine Luz del Mar").
   static TextStyle brandScript(BuildContext context, {double? fontSize}) {
-    return GoogleFonts.greatVibes(
+    return GoogleFonts.pinyonScript(
       fontSize: fontSize ?? 40,
       color: Theme.of(context).colorScheme.onSurface,
     );

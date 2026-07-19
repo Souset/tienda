@@ -20,7 +20,7 @@ Future<void> shareCertificatePdf({
   pw.Font? serif;
   pw.Font? serifBold;
   try {
-    script = await PdfGoogleFonts.greatVibesRegular();
+    script = await PdfGoogleFonts.pinyonScriptRegular();
     serif = await PdfGoogleFonts.playfairDisplayRegular();
     serifBold = await PdfGoogleFonts.playfairDisplayBold();
   } catch (error) {
