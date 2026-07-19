@@ -4,6 +4,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/services/collections.dart';
 import '../../../../shared/models/app_user.dart';
 import '../../../../shared/models/event_item.dart';
+import '../../../films/domain/rating_math.dart';
 import '../../domain/repositories/agenda_repository.dart';
 
 /// Implementación de [AgendaRepository] con Cloud Firestore.
@@ -129,4 +130,51 @@ class AgendaRepositoryImpl implements AgendaRepository {
       _ => const UnknownException(),
     };
   }
+
+  @override
+  Future<void> rateEvent({
+    required String eventId,
+    required String uid,
+    required double score,
+    String? comment,
+  }) async {
+    try {
+      final eventRef = _firestore.collection(Col.events).doc(eventId);
+      final feedbackRef = eventRef.collection('feedback').doc(uid);
+      await _firestore.runTransaction((tx) async {
+        final eventSnap = await tx.get(eventRef);
+        final previousSnap = await tx.get(feedbackRef);
+        final data = eventSnap.data() ?? const {};
+        final result = recalcRating(
+          previous: previousSnap.exists
+              ? ((previousSnap.data()?['score'] as num?)?.toDouble())
+              : null,
+          newScore: score,
+          currentAvg: ((data['feedbackAvg'] as num?) ?? 0).toDouble(),
+          currentCount: ((data['feedbackCount'] as num?) ?? 0).toInt(),
+        );
+        tx.set(feedbackRef, {
+          'score': score,
+          'comment': comment,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        tx.update(eventRef, {
+          'feedbackAvg': result.avg,
+          'feedbackCount': result.count,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      });
+    } on FirebaseException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
+  @override
+  Stream<double?> watchMyEventScore(String eventId, String uid) => _firestore
+      .collection(Col.events)
+      .doc(eventId)
+      .collection('feedback')
+      .doc(uid)
+      .snapshots()
+      .map((snap) => (snap.data()?['score'] as num?)?.toDouble());
 }

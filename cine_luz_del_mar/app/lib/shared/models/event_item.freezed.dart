@@ -290,7 +290,7 @@ as String,
 /// @nodoc
 mixin _$EventItem {
 
-@JsonKey(includeFromJson: false, includeToJson: false) String get id; String get type; String get title; String get description;@NullableTimestampConverter() DateTime? get start;@NullableTimestampConverter() DateTime? get end; Venue? get venue; int get capacity; int get reservedCount; String? get coverUrl; String? get filmId; String get status; bool get featured; List<String> get searchTokens;@NullableTimestampConverter() DateTime? get createdAt;@NullableTimestampConverter() DateTime? get updatedAt;
+@JsonKey(includeFromJson: false, includeToJson: false) String get id; String get type; String get title; String get description;@NullableTimestampConverter() DateTime? get start;@NullableTimestampConverter() DateTime? get end; Venue? get venue; int get capacity; int get reservedCount; double get feedbackAvg; int get feedbackCount; String? get coverUrl; String? get filmId; String get status; bool get featured; List<String> get searchTokens;@NullableTimestampConverter() DateTime? get createdAt;@NullableTimestampConverter() DateTime? get updatedAt;
 /// Create a copy of EventItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -303,16 +303,16 @@ $EventItemCopyWith<EventItem> get copyWith => _$EventItemCopyWithImpl<EventItem>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventItem&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.venue, venue) || other.venue == venue)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&(identical(other.reservedCount, reservedCount) || other.reservedCount == reservedCount)&&(identical(other.coverUrl, coverUrl) || other.coverUrl == coverUrl)&&(identical(other.filmId, filmId) || other.filmId == filmId)&&(identical(other.status, status) || other.status == status)&&(identical(other.featured, featured) || other.featured == featured)&&const DeepCollectionEquality().equals(other.searchTokens, searchTokens)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventItem&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.venue, venue) || other.venue == venue)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&(identical(other.reservedCount, reservedCount) || other.reservedCount == reservedCount)&&(identical(other.feedbackAvg, feedbackAvg) || other.feedbackAvg == feedbackAvg)&&(identical(other.feedbackCount, feedbackCount) || other.feedbackCount == feedbackCount)&&(identical(other.coverUrl, coverUrl) || other.coverUrl == coverUrl)&&(identical(other.filmId, filmId) || other.filmId == filmId)&&(identical(other.status, status) || other.status == status)&&(identical(other.featured, featured) || other.featured == featured)&&const DeepCollectionEquality().equals(other.searchTokens, searchTokens)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,description,start,end,venue,capacity,reservedCount,coverUrl,filmId,status,featured,const DeepCollectionEquality().hash(searchTokens),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,type,title,description,start,end,venue,capacity,reservedCount,feedbackAvg,feedbackCount,coverUrl,filmId,status,featured,const DeepCollectionEquality().hash(searchTokens),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'EventItem(id: $id, type: $type, title: $title, description: $description, start: $start, end: $end, venue: $venue, capacity: $capacity, reservedCount: $reservedCount, coverUrl: $coverUrl, filmId: $filmId, status: $status, featured: $featured, searchTokens: $searchTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'EventItem(id: $id, type: $type, title: $title, description: $description, start: $start, end: $end, venue: $venue, capacity: $capacity, reservedCount: $reservedCount, feedbackAvg: $feedbackAvg, feedbackCount: $feedbackCount, coverUrl: $coverUrl, filmId: $filmId, status: $status, featured: $featured, searchTokens: $searchTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -323,7 +323,7 @@ abstract mixin class $EventItemCopyWith<$Res>  {
   factory $EventItemCopyWith(EventItem value, $Res Function(EventItem) _then) = _$EventItemCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, String type, String title, String description,@NullableTimestampConverter() DateTime? start,@NullableTimestampConverter() DateTime? end, Venue? venue, int capacity, int reservedCount, String? coverUrl, String? filmId, String status, bool featured, List<String> searchTokens,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
+@JsonKey(includeFromJson: false, includeToJson: false) String id, String type, String title, String description,@NullableTimestampConverter() DateTime? start,@NullableTimestampConverter() DateTime? end, Venue? venue, int capacity, int reservedCount, double feedbackAvg, int feedbackCount, String? coverUrl, String? filmId, String status, bool featured, List<String> searchTokens,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
 });
 
 
@@ -340,7 +340,7 @@ class _$EventItemCopyWithImpl<$Res>
 
 /// Create a copy of EventItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? description = null,Object? start = freezed,Object? end = freezed,Object? venue = freezed,Object? capacity = null,Object? reservedCount = null,Object? coverUrl = freezed,Object? filmId = freezed,Object? status = null,Object? featured = null,Object? searchTokens = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? description = null,Object? start = freezed,Object? end = freezed,Object? venue = freezed,Object? capacity = null,Object? reservedCount = null,Object? feedbackAvg = null,Object? feedbackCount = null,Object? coverUrl = freezed,Object? filmId = freezed,Object? status = null,Object? featured = null,Object? searchTokens = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -351,6 +351,8 @@ as DateTime?,end: freezed == end ? _self.end : end // ignore: cast_nullable_to_n
 as DateTime?,venue: freezed == venue ? _self.venue : venue // ignore: cast_nullable_to_non_nullable
 as Venue?,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
 as int,reservedCount: null == reservedCount ? _self.reservedCount : reservedCount // ignore: cast_nullable_to_non_nullable
+as int,feedbackAvg: null == feedbackAvg ? _self.feedbackAvg : feedbackAvg // ignore: cast_nullable_to_non_nullable
+as double,feedbackCount: null == feedbackCount ? _self.feedbackCount : feedbackCount // ignore: cast_nullable_to_non_nullable
 as int,coverUrl: freezed == coverUrl ? _self.coverUrl : coverUrl // ignore: cast_nullable_to_non_nullable
 as String?,filmId: freezed == filmId ? _self.filmId : filmId // ignore: cast_nullable_to_non_nullable
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
@@ -455,10 +457,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  double feedbackAvg,  int feedbackCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EventItem() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.feedbackAvg,_that.feedbackCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -476,10 +478,10 @@ return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  double feedbackAvg,  int feedbackCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _EventItem():
-return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.feedbackAvg,_that.feedbackCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -496,10 +498,10 @@ return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  String type,  String title,  String description, @NullableTimestampConverter()  DateTime? start, @NullableTimestampConverter()  DateTime? end,  Venue? venue,  int capacity,  int reservedCount,  double feedbackAvg,  int feedbackCount,  String? coverUrl,  String? filmId,  String status,  bool featured,  List<String> searchTokens, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _EventItem() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_that.end,_that.venue,_that.capacity,_that.reservedCount,_that.feedbackAvg,_that.feedbackCount,_that.coverUrl,_that.filmId,_that.status,_that.featured,_that.searchTokens,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -511,7 +513,7 @@ return $default(_that.id,_that.type,_that.title,_that.description,_that.start,_t
 
 @JsonSerializable(explicitToJson: true)
 class _EventItem extends EventItem {
-  const _EventItem({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.type = 'proyeccion', this.title = '', this.description = '', @NullableTimestampConverter() this.start, @NullableTimestampConverter() this.end, this.venue, this.capacity = 0, this.reservedCount = 0, this.coverUrl, this.filmId, this.status = 'draft', this.featured = false, final  List<String> searchTokens = const <String>[], @NullableTimestampConverter() this.createdAt, @NullableTimestampConverter() this.updatedAt}): _searchTokens = searchTokens,super._();
+  const _EventItem({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.type = 'proyeccion', this.title = '', this.description = '', @NullableTimestampConverter() this.start, @NullableTimestampConverter() this.end, this.venue, this.capacity = 0, this.reservedCount = 0, this.feedbackAvg = 0, this.feedbackCount = 0, this.coverUrl, this.filmId, this.status = 'draft', this.featured = false, final  List<String> searchTokens = const <String>[], @NullableTimestampConverter() this.createdAt, @NullableTimestampConverter() this.updatedAt}): _searchTokens = searchTokens,super._();
   factory _EventItem.fromJson(Map<String, dynamic> json) => _$EventItemFromJson(json);
 
 @override@JsonKey(includeFromJson: false, includeToJson: false) final  String id;
@@ -523,6 +525,8 @@ class _EventItem extends EventItem {
 @override final  Venue? venue;
 @override@JsonKey() final  int capacity;
 @override@JsonKey() final  int reservedCount;
+@override@JsonKey() final  double feedbackAvg;
+@override@JsonKey() final  int feedbackCount;
 @override final  String? coverUrl;
 @override final  String? filmId;
 @override@JsonKey() final  String status;
@@ -550,16 +554,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventItem&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.venue, venue) || other.venue == venue)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&(identical(other.reservedCount, reservedCount) || other.reservedCount == reservedCount)&&(identical(other.coverUrl, coverUrl) || other.coverUrl == coverUrl)&&(identical(other.filmId, filmId) || other.filmId == filmId)&&(identical(other.status, status) || other.status == status)&&(identical(other.featured, featured) || other.featured == featured)&&const DeepCollectionEquality().equals(other._searchTokens, _searchTokens)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventItem&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.venue, venue) || other.venue == venue)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&(identical(other.reservedCount, reservedCount) || other.reservedCount == reservedCount)&&(identical(other.feedbackAvg, feedbackAvg) || other.feedbackAvg == feedbackAvg)&&(identical(other.feedbackCount, feedbackCount) || other.feedbackCount == feedbackCount)&&(identical(other.coverUrl, coverUrl) || other.coverUrl == coverUrl)&&(identical(other.filmId, filmId) || other.filmId == filmId)&&(identical(other.status, status) || other.status == status)&&(identical(other.featured, featured) || other.featured == featured)&&const DeepCollectionEquality().equals(other._searchTokens, _searchTokens)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,description,start,end,venue,capacity,reservedCount,coverUrl,filmId,status,featured,const DeepCollectionEquality().hash(_searchTokens),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,type,title,description,start,end,venue,capacity,reservedCount,feedbackAvg,feedbackCount,coverUrl,filmId,status,featured,const DeepCollectionEquality().hash(_searchTokens),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'EventItem(id: $id, type: $type, title: $title, description: $description, start: $start, end: $end, venue: $venue, capacity: $capacity, reservedCount: $reservedCount, coverUrl: $coverUrl, filmId: $filmId, status: $status, featured: $featured, searchTokens: $searchTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'EventItem(id: $id, type: $type, title: $title, description: $description, start: $start, end: $end, venue: $venue, capacity: $capacity, reservedCount: $reservedCount, feedbackAvg: $feedbackAvg, feedbackCount: $feedbackCount, coverUrl: $coverUrl, filmId: $filmId, status: $status, featured: $featured, searchTokens: $searchTokens, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -570,7 +574,7 @@ abstract mixin class _$EventItemCopyWith<$Res> implements $EventItemCopyWith<$Re
   factory _$EventItemCopyWith(_EventItem value, $Res Function(_EventItem) _then) = __$EventItemCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, String type, String title, String description,@NullableTimestampConverter() DateTime? start,@NullableTimestampConverter() DateTime? end, Venue? venue, int capacity, int reservedCount, String? coverUrl, String? filmId, String status, bool featured, List<String> searchTokens,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
+@JsonKey(includeFromJson: false, includeToJson: false) String id, String type, String title, String description,@NullableTimestampConverter() DateTime? start,@NullableTimestampConverter() DateTime? end, Venue? venue, int capacity, int reservedCount, double feedbackAvg, int feedbackCount, String? coverUrl, String? filmId, String status, bool featured, List<String> searchTokens,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
 });
 
 
@@ -587,7 +591,7 @@ class __$EventItemCopyWithImpl<$Res>
 
 /// Create a copy of EventItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? description = null,Object? start = freezed,Object? end = freezed,Object? venue = freezed,Object? capacity = null,Object? reservedCount = null,Object? coverUrl = freezed,Object? filmId = freezed,Object? status = null,Object? featured = null,Object? searchTokens = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? description = null,Object? start = freezed,Object? end = freezed,Object? venue = freezed,Object? capacity = null,Object? reservedCount = null,Object? feedbackAvg = null,Object? feedbackCount = null,Object? coverUrl = freezed,Object? filmId = freezed,Object? status = null,Object? featured = null,Object? searchTokens = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_EventItem(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -598,6 +602,8 @@ as DateTime?,end: freezed == end ? _self.end : end // ignore: cast_nullable_to_n
 as DateTime?,venue: freezed == venue ? _self.venue : venue // ignore: cast_nullable_to_non_nullable
 as Venue?,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
 as int,reservedCount: null == reservedCount ? _self.reservedCount : reservedCount // ignore: cast_nullable_to_non_nullable
+as int,feedbackAvg: null == feedbackAvg ? _self.feedbackAvg : feedbackAvg // ignore: cast_nullable_to_non_nullable
+as double,feedbackCount: null == feedbackCount ? _self.feedbackCount : feedbackCount // ignore: cast_nullable_to_non_nullable
 as int,coverUrl: freezed == coverUrl ? _self.coverUrl : coverUrl // ignore: cast_nullable_to_non_nullable
 as String?,filmId: freezed == filmId ? _self.filmId : filmId // ignore: cast_nullable_to_non_nullable
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable

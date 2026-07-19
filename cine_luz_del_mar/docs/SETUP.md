@@ -94,8 +94,28 @@ hosting usa otra, p. ej. `/usr/local/bin/php`):
 
 ```
 0 9 * * *  /usr/local/bin/php /home/TU_USUARIO/public_html/cine-api/cron/recordatorios.php
+0 11 * * * /usr/local/bin/php /home/TU_USUARIO/public_html/cine-api/cron/valoraciones.php
+0 10 * * 1 /usr/local/bin/php /home/TU_USUARIO/public_html/cine-api/cron/boletin.php
 0 6 1 1 *  /usr/local/bin/php /home/TU_USUARIO/public_html/cine-api/cron/generar_cuotas.php
 ```
+
+(recordatorios de eventos, petición de valoración post-evento, boletín
+semanal de los lunes y generación anual de cuotas)
+
+### 3.2 Web pública (SEO)
+
+Al subir `server/` ya queda publicada una página estática con la agenda y
+las noticias en `https://TU_DOMINIO/cine-api/web/` — indexable por Google
+y cacheada 10 minutos. Si quieres servirla en un dominio o subdominio
+propio (p. ej. `cineluzdelmar.es`), apunta su docroot a esa carpeta desde
+cPanel.
+
+### 3.3 Fichas de película automáticas (TMDB, opcional)
+
+En el panel de administración → Películas → "Autocompletar desde TMDB",
+la primera vez te pedirá una API Key: se consigue gratis registrándote en
+themoviedb.org (Ajustes → API). Se guarda en la app y no hay que volver a
+introducirla.
 
 ## 4. Desplegar reglas, índices y web
 

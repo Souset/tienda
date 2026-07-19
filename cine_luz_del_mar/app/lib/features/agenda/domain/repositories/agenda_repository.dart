@@ -25,4 +25,16 @@ abstract class AgendaRepository {
 
   /// Cancela la reserva del usuario [uid] en el evento [eventId].
   Future<void> cancelReservation(String eventId, String uid);
+
+  /// Valora un evento ya celebrado (1-5) actualizando los agregados
+  /// feedbackAvg/feedbackCount en la misma transacción.
+  Future<void> rateEvent({
+    required String eventId,
+    required String uid,
+    required double score,
+    String? comment,
+  });
+
+  /// Valoración propia de un evento (null si aún no se valoró).
+  Stream<double?> watchMyEventScore(String eventId, String uid);
 }

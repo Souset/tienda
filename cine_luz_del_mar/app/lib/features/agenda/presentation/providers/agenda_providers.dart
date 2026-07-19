@@ -70,3 +70,15 @@ class AgendaController extends Notifier<AsyncValue<void>> {
 
 final agendaControllerProvider =
     NotifierProvider<AgendaController, AsyncValue<void>>(AgendaController.new);
+
+/// Valoración propia del evento (null si aún no valoró o sin sesión).
+final myEventScoreProvider = StreamProvider.family<double?, String>((
+  ref,
+  eventId,
+) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return Stream.value(null);
+  return ref
+      .watch(agendaRepositoryProvider)
+      .watchMyEventScore(eventId, user.id);
+});

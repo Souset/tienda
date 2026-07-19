@@ -721,6 +721,113 @@ class _FilmForm extends ConsumerStatefulWidget {
 }
 
 class _FilmFormState extends ConsumerState<_FilmForm> {
+  /// Autocompleta la ficha desde TMDB (clave gratuita guardada en
+  /// app_config/features.tmdbApiKey; se pide la primera vez).
+  Future<void> _searchTmdb() async {
+    final repo = ref.read(adminRepositoryProvider);
+    var key = await repo.getTmdbKey();
+    if (!mounted) return;
+
+    if (key == null) {
+      final controller = TextEditingController();
+      key = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Clave de TMDB'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Crea una cuenta gratuita en themoviedb.org y pega aquí '
+                'tu API Key (ajustes → API). Solo hay que hacerlo una vez.',
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'API Key'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(controller.text.trim()),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      );
+      if (key == null || key.isEmpty || !mounted) return;
+      final savedKey = key;
+      await runAdminAction(context, () => repo.saveTmdbKey(savedKey));
+    }
+
+    if (!mounted) return;
+    final query = _title.text.trim();
+    if (query.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Escribe primero el título a buscar')),
+      );
+      return;
+    }
+
+    try {
+      final results = await repo.searchTmdb(query, key);
+      if (!mounted) return;
+      if (results.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Sin resultados en TMDB')));
+        return;
+      }
+      final selected = await showDialog<({int id, String title, String? year})>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text('Resultados de TMDB'),
+          children: [
+            for (final r in results)
+              SimpleDialogOption(
+                onPressed: () => Navigator.of(context).pop(r),
+                child: Text(
+                  '${r.title}${r.year != null ? ' (${r.year})' : ''}',
+                ),
+              ),
+          ],
+        ),
+      );
+      if (selected == null || !mounted) return;
+
+      final details = await repo.tmdbDetails(selected.id, key);
+      if (!mounted) return;
+      setState(() {
+        _title.text = selected.title;
+        if (details.year != null) _year.text = '${details.year}';
+        if (details.director != null) _director.text = details.director!;
+        if ((details.synopsis ?? '').isNotEmpty) {
+          _synopsis.text = details.synopsis!;
+        }
+        if (details.genres.isNotEmpty) {
+          _genres.text = details.genres.join(', ').toLowerCase();
+        }
+        if (details.posterUrl != null) _poster.text = details.posterUrl!;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ficha completada desde TMDB')),
+      );
+    } on AppException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   late final _title = TextEditingController(text: widget.item?.title);
   late final _year = TextEditingController(
     text: widget.item?.year?.toString() ?? '',
@@ -791,6 +898,15 @@ class _FilmFormState extends ConsumerState<_FilmForm> {
               TextField(
                 controller: _title,
                 decoration: const InputDecoration(labelText: 'Título'),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: _searchTmdb,
+                  icon: const Icon(Icons.travel_explore_outlined),
+                  label: const Text('Autocompletar desde TMDB'),
+                ),
               ),
               const SizedBox(height: 12),
               Row(

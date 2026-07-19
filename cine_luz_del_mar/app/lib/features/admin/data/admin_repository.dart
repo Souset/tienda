@@ -328,6 +328,159 @@ class AdminRepository {
     }
   }
 
+  // ---------- Exportación CSV (junta) ----------
+
+  /// CSV de socios con datos de contacto y cuota del año en curso.
+  Future<String> exportMembersCsv() async {
+    try {
+      final year = DateTime.now().year.toString();
+      final members = await _firestore
+          .collection(Col.members)
+          .orderBy('memberNumber')
+          .get();
+      final buffer = StringBuffer(
+        'numero;nombre;email;estado;alta;cuota_$year;importe;pagada_el\n',
+      );
+      String clean(Object? value) =>
+          (value?.toString() ?? '').replaceAll(';', ',').replaceAll('\n', ' ');
+
+      for (final doc in members.docs) {
+        final member = Member.fromJson(doc.data()).copyWith(id: doc.id);
+        final user = await getUser(doc.id);
+        final feeSnap = await _firestore
+            .collection(Col.members)
+            .doc(doc.id)
+            .collection('fees')
+            .doc(year)
+            .get();
+        final fee = feeSnap.data();
+        final paidAt = fee?['paidAt'];
+        buffer.writeln(
+          [
+            member.memberNumber.toString().padLeft(4, '0'),
+            clean(user?.displayName),
+            clean(user?.email),
+            member.status,
+            member.joinedAt == null
+                ? ''
+                : '${member.joinedAt!.day}/${member.joinedAt!.month}/${member.joinedAt!.year}',
+            clean(fee?['status'] ?? 'sin cuota'),
+            clean(fee?['amount'] ?? ''),
+            paidAt is Timestamp
+                ? '${paidAt.toDate().day}/${paidAt.toDate().month}/${paidAt.toDate().year}'
+                : '',
+          ].join(';'),
+        );
+      }
+      return buffer.toString();
+    } on FirebaseException catch (e) {
+      throw _translate(e);
+    }
+  }
+
+  // ---------- TMDB (fichas de película) ----------
+
+  static const _tmdbBase = 'https://api.themoviedb.org/3';
+
+  Future<String?> getTmdbKey() async {
+    final snap = await _firestore
+        .collection(Col.appConfig)
+        .doc('features')
+        .get();
+    final key = snap.data()?['tmdbApiKey'] as String?;
+    return (key == null || key.isEmpty) ? null : key;
+  }
+
+  Future<void> saveTmdbKey(String key) async {
+    try {
+      await _firestore.collection(Col.appConfig).doc('features').set({
+        'tmdbApiKey': key.trim(),
+      }, SetOptions(merge: true));
+    } on FirebaseException catch (e) {
+      throw _translate(e);
+    }
+  }
+
+  /// Busca películas en TMDB (título + año + id) en español.
+  Future<List<({int id, String title, String? year})>> searchTmdb(
+    String query,
+    String apiKey,
+  ) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$_tmdbBase/search/movie',
+        queryParameters: {
+          'query': query,
+          'api_key': apiKey,
+          'language': 'es-ES',
+        },
+      );
+      final results = (response.data?['results'] as List?) ?? const [];
+      return [
+        for (final r in results.take(8))
+          (
+            id: (r['id'] as num).toInt(),
+            title: (r['title'] ?? '') as String,
+            year: (r['release_date'] as String?)?.split('-').firstOrNull,
+          ),
+      ];
+    } on DioException {
+      throw const NetworkException(
+        'No se pudo consultar TMDB (¿clave válida?)',
+      );
+    }
+  }
+
+  /// Ficha completa de TMDB: sinopsis, año, dirección, géneros y póster.
+  Future<
+    ({
+      String? synopsis,
+      int? year,
+      String? director,
+      List<String> genres,
+      String? posterUrl,
+    })
+  >
+  tmdbDetails(int movieId, String apiKey) async {
+    try {
+      final results = await Future.wait([
+        _dio.get<Map<String, dynamic>>(
+          '$_tmdbBase/movie/$movieId',
+          queryParameters: {'api_key': apiKey, 'language': 'es-ES'},
+        ),
+        _dio.get<Map<String, dynamic>>(
+          '$_tmdbBase/movie/$movieId/credits',
+          queryParameters: {'api_key': apiKey},
+        ),
+      ]);
+      final movie = results[0].data ?? const {};
+      final crew = (results[1].data?['crew'] as List?) ?? const [];
+      final director =
+          crew.cast<Map<String, dynamic>>().firstWhere(
+                (c) => c['job'] == 'Director',
+                orElse: () => const {},
+              )['name']
+              as String?;
+      final poster = movie['poster_path'] as String?;
+      return (
+        synopsis: movie['overview'] as String?,
+        year: (movie['release_date'] as String?)?.isNotEmpty == true
+            ? int.tryParse((movie['release_date'] as String).split('-').first)
+            : null,
+        director: director,
+        genres: [
+          for (final g in (movie['genres'] as List?) ?? const [])
+            (g['name'] ?? '') as String,
+        ],
+        posterUrl: poster == null
+            ? null
+            : 'https://image.tmdb.org/t/p/w500$poster',
+      );
+    } on DioException {
+      throw const NetworkException('No se pudo cargar la ficha de TMDB');
+    }
+  }
+
   // ---------- Push ----------
 
   Future<({int sent, int inbox})> sendPush({

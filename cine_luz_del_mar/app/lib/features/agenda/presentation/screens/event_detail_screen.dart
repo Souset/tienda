@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +12,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/event_item.dart';
 import '../../../../shared/widgets/confirm_dialog.dart';
 import '../../../../shared/widgets/favorite_button.dart';
+import '../../../../shared/widgets/brightness_boost.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/agenda_providers.dart';
@@ -143,6 +145,7 @@ class _EventDetailBody extends ConsumerWidget {
                     style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
                   ),
                 ],
+                _EventFeedback(event: event),
               ],
             ).animate().fadeIn(duration: 300.ms),
           ),
@@ -316,14 +319,23 @@ class _EventCta extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: loading ? null : () => _cancel(context, ref),
-              child: loading
-                  ? const _BtnSpinner()
-                  : const Text('Cancelar reserva'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () => _showTicketSheet(context, event.id, user.id),
+                  icon: const Icon(Icons.qr_code_2),
+                  label: const Text('Ver entrada'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: loading ? null : () => _cancel(context, ref),
+                  child: loading ? const _BtnSpinner() : const Text('Cancelar'),
+                ),
+              ),
+            ],
           ),
         ],
       );
@@ -357,6 +369,154 @@ class _EventCta extends ConsumerWidget {
 }
 
 /// Spinner pequeño para el interior de un botón durante la acción.
+
+/// Entrada con QR de la reserva (brillo al máximo mientras se muestra).
+void _showTicketSheet(BuildContext context, String eventId, String uid) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) {
+      final theme = Theme.of(context);
+      return BrightnessBoost(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Tu entrada', style: theme.textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text(
+                  'Muéstrala en la puerta para el check-in',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: QrImageView(
+                    data: '{"ev":"$eventId","uid":"$uid"}',
+                    size: 210,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// Valoración del evento una vez celebrado (solo para quienes reservaron).
+class _EventFeedback extends ConsumerStatefulWidget {
+  const _EventFeedback({required this.event});
+
+  final EventItem event;
+
+  @override
+  ConsumerState<_EventFeedback> createState() => _EventFeedbackState();
+}
+
+class _EventFeedbackState extends ConsumerState<_EventFeedback> {
+  double _score = 0;
+  bool _sending = false;
+
+  Future<void> _send(double score) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null || _sending) return;
+    setState(() {
+      _sending = true;
+      _score = score;
+    });
+    try {
+      await ref
+          .read(agendaRepositoryProvider)
+          .rateEvent(eventId: widget.event.id, uid: user.id, score: score);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('¡Gracias por tu valoración!')),
+        );
+      }
+    } on AppException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final user = ref.watch(currentUserProvider);
+    final reservation = ref.watch(myReservationProvider(widget.event.id)).value;
+    final ended =
+        widget.event.start != null &&
+        widget.event.start!.isBefore(
+          DateTime.now().subtract(const Duration(hours: 3)),
+        );
+    if (user == null || reservation == null || !ended) {
+      return const SizedBox.shrink();
+    }
+
+    final myScore = ref.watch(myEventScoreProvider(widget.event.id)).value;
+    final shown = myScore ?? _score;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            myScore == null
+                ? '¿Qué te pareció esta actividad?'
+                : 'Tu valoración',
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (var i = 1; i <= 5; i++)
+                IconButton(
+                  onPressed: _sending ? null : () => _send(i.toDouble()),
+                  icon: Icon(
+                    shown >= i ? Icons.star : Icons.star_border,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              if (widget.event.feedbackCount > 0) ...[
+                const Spacer(),
+                Text(
+                  '${widget.event.feedbackAvg.toStringAsFixed(1)} '
+                  '(${widget.event.feedbackCount})',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _BtnSpinner extends StatelessWidget {
   const _BtnSpinner();
 

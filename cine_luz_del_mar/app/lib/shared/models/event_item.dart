@@ -44,6 +44,8 @@ abstract class EventItem with _$EventItem {
     Venue? venue,
     @Default(0) int capacity,
     @Default(0) int reservedCount,
+    @Default(0) double feedbackAvg,
+    @Default(0) int feedbackCount,
     String? coverUrl,
     String? filmId,
     @Default('draft') String status,

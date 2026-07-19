@@ -87,7 +87,8 @@ service cloud.firestore {
 
       // Gestores editan todo; cualquier usuario autenticado solo puede
       // mover el contador de reservas en ±1 dentro de la transacción que
-      // crea o cancela su propia reserva.
+      // crea o cancela su propia reserva, o los agregados de valoración
+      // (validados en rango) junto a su propia valoración.
       allow update: if hasRank(3)
         || (isSignedIn()
           && request.resource.data.diff(resource.data).affectedKeys()
@@ -96,7 +97,13 @@ service cloud.firestore {
                 == resource.data.reservedCount + 1
             || request.resource.data.reservedCount
                 == resource.data.reservedCount - 1)
-          && request.resource.data.reservedCount >= 0);
+          && request.resource.data.reservedCount >= 0)
+        || (isVerified()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['feedbackAvg', 'feedbackCount', 'updatedAt'])
+          && request.resource.data.feedbackAvg >= 0
+          && request.resource.data.feedbackAvg <= 5
+          && request.resource.data.feedbackCount >= 0);
 
       match /reservations/{uid} {
         allow read: if isOwner(uid) || hasRank(3);
@@ -128,6 +135,16 @@ service cloud.firestore {
           || hasRank(3);
 
         allow delete: if hasRank(3);
+      }
+
+      // Valoración post-evento de los asistentes (1-5 + comentario).
+      match /feedback/{uid} {
+        allow read: if isSignedIn();
+        allow create, update: if isOwner(uid)
+          && isVerified()
+          && request.resource.data.score >= 1
+          && request.resource.data.score <= 5;
+        allow delete: if isOwner(uid) || hasRank(4);
       }
     }
 

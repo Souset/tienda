@@ -10,6 +10,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/attendance_record.dart';
 import '../../../../shared/models/member.dart';
 import '../../../../shared/widgets/brand_wordmark.dart';
+import '../../../../shared/widgets/brightness_boost.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../agenda/presentation/widgets/event_type_labels.dart';
@@ -66,7 +67,9 @@ class MemberCardScreen extends ConsumerWidget {
           final displayName = user?.displayName.trim().isNotEmpty == true
               ? user!.displayName
               : 'Socio/a';
-          return _MemberCardBody(member: member, displayName: displayName);
+          return BrightnessBoost(
+            child: _MemberCardBody(member: member, displayName: displayName),
+          );
         },
       ),
     );

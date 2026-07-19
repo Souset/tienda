@@ -190,17 +190,24 @@ class _ScannerViewState extends ConsumerState<_ScannerView> {
 
     String? uid;
     int? number;
+    String? ticketEventId;
     try {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       uid = decoded['uid'] as String?;
       final n = decoded['n'];
       number = n is int ? n : int.tryParse(n?.toString() ?? '');
+      // Entrada por reserva: {"ev": eventId, "uid": uid}.
+      ticketEventId = decoded['ev'] as String?;
     } catch (_) {
       _showResult(const _ScanResult.error('Código QR no reconocido'));
       return;
     }
     if (uid == null || uid.isEmpty) {
       _showResult(const _ScanResult.error('Código QR sin socio válido'));
+      return;
+    }
+    if (ticketEventId != null && ticketEventId != widget.event.id) {
+      _showResult(const _ScanResult.error('Esta entrada es de otra actividad'));
       return;
     }
 

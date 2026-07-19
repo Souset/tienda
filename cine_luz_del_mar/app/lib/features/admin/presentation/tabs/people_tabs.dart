@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../../../core/errors/app_exception.dart';
 
 import '../../../../core/config/user_role.dart';
 import '../../../../core/utils/formatters.dart';
@@ -100,17 +104,63 @@ class MembersTab extends ConsumerWidget {
     );
   }
 
+  /// Exporta socios y cuotas a CSV (compartir o copiar al portapapeles).
+  Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
+    try {
+      final csv = await ref.read(adminRepositoryProvider).exportMembersCsv();
+      final file = XFile.fromData(
+        // BOM UTF-8 para que Excel abra los acentos correctamente.
+        Uint8List.fromList([0xEF, 0xBB, 0xBF, ...csv.codeUnits]),
+        mimeType: 'text/csv',
+        name: 'socios-cine-luz-del-mar.csv',
+      );
+      await SharePlus.instance.share(
+        ShareParams(files: [file], subject: 'Socios Cine Luz del Mar'),
+      );
+    } on AppException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      // Plataformas sin diálogo de compartir: portapapeles como respaldo.
+      final csv = await ref.read(adminRepositoryProvider).exportMembersCsv();
+      await Clipboard.setData(ClipboardData(text: csv));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('CSV copiado al portapapeles (pégalo en Excel)'),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(adminRepositoryProvider);
     final members = ref.watch(allMembersProvider);
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'alta-socio',
-        onPressed: () => _alta(context, ref),
-        icon: const Icon(Icons.person_add_alt),
-        label: const Text('Alta de socio'),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'export-csv',
+            onPressed: () => _exportCsv(context, ref),
+            icon: const Icon(Icons.table_view_outlined),
+            label: const Text('Exportar CSV'),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'alta-socio',
+            onPressed: () => _alta(context, ref),
+            icon: const Icon(Icons.person_add_alt),
+            label: const Text('Alta de socio'),
+          ),
+        ],
       ),
       body: members.when(
         loading: () => const ShimmerList(itemHeight: 64),
