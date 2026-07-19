@@ -10,6 +10,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/event_item.dart';
 import '../../../../shared/widgets/confirm_dialog.dart';
+import '../../../../shared/widgets/favorite_button.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/agenda_providers.dart';
@@ -79,6 +80,7 @@ class _EventDetailBody extends ConsumerWidget {
         SliverAppBar(
           expandedHeight: 260,
           pinned: true,
+          actions: [FavoriteButton.event(event.id)],
           flexibleSpace: FlexibleSpaceBar(
             background: Hero(
               tag: 'event-${event.id}',

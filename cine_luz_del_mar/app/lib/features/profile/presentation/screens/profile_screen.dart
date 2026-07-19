@@ -11,6 +11,8 @@ import '../../../../shared/widgets/confirm_dialog.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import 'certificates_screen.dart';
+import 'favorites_screen.dart';
 
 /// Pantalla de Perfil: datos del socio, accesos y preferencias.
 class ProfileScreen extends ConsumerWidget {
@@ -115,16 +117,20 @@ class _ProfileBody extends ConsumerWidget {
           onTap: () => context.push('/notificaciones'),
         ),
         ListTile(
+          leading: const Icon(Icons.favorite_border),
+          title: const Text('Favoritos'),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const FavoritesScreen()),
+          ),
+        ),
+        ListTile(
           leading: const Icon(Icons.workspace_premium_outlined),
           title: const Text('Mis certificados'),
           trailing: const Icon(Icons.chevron_right_rounded),
-          onTap: () {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(content: Text('Disponible próximamente')),
-              );
-          },
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const CertificatesScreen()),
+          ),
         ),
         const Divider(),
         SwitchListTile(

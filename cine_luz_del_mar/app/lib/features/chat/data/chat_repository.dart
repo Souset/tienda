@@ -70,6 +70,29 @@ class ChatRepository {
     }
   }
 
+  /// Crea un chat de grupo con nombre y miembros elegidos.
+  Future<String> createGroupChat({
+    required String myUid,
+    required String name,
+    required List<String> memberUids,
+  }) async {
+    try {
+      final uids = {...memberUids, myUid}.toList()..sort();
+      final doc = await _firestore.collection(Col.chats).add({
+        'type': 'group',
+        'memberUids': uids,
+        'name': name.trim(),
+        'lastMessageText': null,
+        'lastMessageSenderUid': null,
+        'lastMessageAt': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return doc.id;
+    } on FirebaseException catch (e) {
+      throw _translate(e);
+    }
+  }
+
   Future<void> sendMessage({
     required String chatId,
     required String myUid,

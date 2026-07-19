@@ -20,6 +20,33 @@ class ChatListScreen extends ConsumerWidget {
     final me = ref.read(currentUserProvider);
     if (me == null) return;
 
+    // Elegir tipo de conversación.
+    final type = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Chat directo'),
+              subtitle: const Text('Conversación con una persona'),
+              onTap: () => Navigator.of(context).pop('direct'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.group_outlined),
+              title: const Text('Grupo'),
+              subtitle: const Text('Con nombre y varias personas'),
+              onTap: () => Navigator.of(context).pop('group'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (type == null || !context.mounted) return;
+
     List<AppUser> users;
     try {
       users = await ref.read(chatRepositoryProvider).listUsers(limit: 50);
@@ -33,6 +60,45 @@ class ChatListScreen extends ConsumerWidget {
     }
     users.removeWhere((u) => u.id == me.id);
     if (!context.mounted) return;
+
+    if (type == 'group') {
+      final result =
+          await showModalBottomSheet<({String name, List<String> uids})>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            showDragHandle: true,
+            builder: (context) => _GroupCreator(users: users),
+          );
+      if (result == null || !context.mounted) return;
+      try {
+        final chatId = await ref
+            .read(chatRepositoryProvider)
+            .createGroupChat(
+              myUid: me.id,
+              name: result.name,
+              memberUids: result.uids,
+            );
+        if (context.mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ChatConversationScreen(
+                chatId: chatId,
+                isGroup: true,
+                groupName: result.name,
+              ),
+            ),
+          );
+        }
+      } on AppException catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.message)));
+        }
+      }
+      return;
+    }
 
     final selected = await showModalBottomSheet<AppUser>(
       context: context,
@@ -175,8 +241,116 @@ class _ChatTile extends ConsumerWidget {
       ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => ChatConversationScreen(chatId: chat.id, other: other),
+          builder: (_) => ChatConversationScreen(
+            chatId: chat.id,
+            other: other,
+            isGroup: isGroup,
+            groupName: chat.name,
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Creación de grupo: nombre + selección múltiple de personas.
+class _GroupCreator extends StatefulWidget {
+  const _GroupCreator({required this.users});
+
+  final List<AppUser> users;
+
+  @override
+  State<_GroupCreator> createState() => _GroupCreatorState();
+}
+
+class _GroupCreatorState extends State<_GroupCreator> {
+  final _name = TextEditingController();
+  final Set<String> _selected = {};
+  String _filter = '';
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = widget.users
+        .where(
+          (u) => u.displayName.toLowerCase().contains(_filter.toLowerCase()),
+        )
+        .toList();
+    final canCreate = _name.text.trim().isNotEmpty && _selected.isNotEmpty;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: TextField(
+              controller: _name,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Nombre del grupo',
+                hintText: 'Taller de guion 2026',
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Buscar personas…',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) => setState(() => _filter = value),
+            ),
+          ),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final user in filtered.take(30))
+                  CheckboxListTile(
+                    value: _selected.contains(user.id),
+                    onChanged: (checked) => setState(() {
+                      checked == true
+                          ? _selected.add(user.id)
+                          : _selected.remove(user.id);
+                    }),
+                    secondary: UserAvatar(
+                      photoUrl: user.photoUrl,
+                      name: user.displayName,
+                      size: 36,
+                    ),
+                    title: Text(user.displayName),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: canCreate
+                    ? () => Navigator.of(
+                        context,
+                      ).pop((name: _name.text.trim(), uids: _selected.toList()))
+                    : null,
+                child: Text(
+                  _selected.isEmpty
+                      ? 'Elige participantes'
+                      : 'Crear grupo (${_selected.length})',
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -56,6 +56,50 @@ class MembersTab extends ConsumerWidget {
     );
   }
 
+  Future<void> _certificado(
+    BuildContext context,
+    WidgetRef ref,
+    Member member,
+  ) async {
+    final me = ref.read(currentUserProvider);
+    final user = ref.read(adminUserProvider(member.id)).value;
+    final controller = TextEditingController();
+    final title = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Certificado para ${user?.displayName ?? 'el socio'}'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Concepto',
+            hintText: 'ha completado el Taller de guion (20 h)',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Emitir'),
+          ),
+        ],
+      ),
+    );
+    if (title == null || title.isEmpty || me == null || !context.mounted) {
+      return;
+    }
+    await runAdminAction(
+      context,
+      () => ref
+          .read(adminRepositoryProvider)
+          .issueCertificate(uid: member.id, title: title, issuedBy: me.id),
+      successMessage: 'Certificado emitido: aparecerá en el perfil del socio',
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(adminRepositoryProvider);
@@ -103,6 +147,7 @@ class MembersTab extends ConsumerWidget {
                     trailing: PopupMenuButton<String>(
                       onSelected: (action) => switch (action) {
                         'fees' => _fees(context, ref, member),
+                        'certificate' => _certificado(context, ref, member),
                         'suspend' => runAdminAction(
                           context,
                           () => repo.setMemberStatus(
@@ -133,6 +178,10 @@ class MembersTab extends ConsumerWidget {
                         const PopupMenuItem(
                           value: 'fees',
                           child: Text('Cuotas'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'certificate',
+                          child: Text('Emitir certificado'),
                         ),
                         PopupMenuItem(
                           value: 'suspend',

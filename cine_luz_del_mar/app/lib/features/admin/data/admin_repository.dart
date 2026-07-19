@@ -273,6 +273,27 @@ class AdminRepository {
     }
   }
 
+  /// Emite un certificado a un usuario (coordinador+ según reglas).
+  Future<void> issueCertificate({
+    required String uid,
+    required String title,
+    required String issuedBy,
+    String? eventId,
+  }) async {
+    try {
+      await _firestore.collection(Col.certificates).add({
+        'uid': uid,
+        'title': title,
+        'eventId': eventId,
+        'pdfUrl': null,
+        'issuedBy': issuedBy,
+        'issuedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw _translate(e);
+    }
+  }
+
   // ---------- Usuarios ----------
 
   Stream<List<AppUser>> watchUsers() => _firestore

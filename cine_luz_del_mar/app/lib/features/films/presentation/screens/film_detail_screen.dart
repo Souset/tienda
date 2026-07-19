@@ -12,6 +12,7 @@ import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../../shared/widgets/favorite_button.dart';
 import '../providers/films_providers.dart';
 import '../widgets/star_rating.dart';
 
@@ -26,7 +27,7 @@ class FilmDetailScreen extends ConsumerWidget {
     final filmAsync = ref.watch(filmProvider(filmId));
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(actions: [FavoriteButton.film(filmId)]),
       body: filmAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(

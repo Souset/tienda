@@ -12,10 +12,18 @@ import '../providers/chat_providers.dart';
 
 /// Conversación de chat con burbujas, lecturas y separadores de día.
 class ChatConversationScreen extends ConsumerStatefulWidget {
-  const ChatConversationScreen({super.key, required this.chatId, this.other});
+  const ChatConversationScreen({
+    super.key,
+    required this.chatId,
+    this.other,
+    this.isGroup = false,
+    this.groupName,
+  });
 
   final String chatId;
   final AppUser? other;
+  final bool isGroup;
+  final String? groupName;
 
   @override
   ConsumerState<ChatConversationScreen> createState() =>
@@ -96,15 +104,20 @@ class _ChatConversationScreenState
         titleSpacing: 0,
         title: Row(
           children: [
-            UserAvatar(
-              photoUrl: widget.other?.photoUrl,
-              name: widget.other?.displayName ?? 'Chat',
-              size: 36,
-            ),
+            if (widget.isGroup)
+              CircleAvatar(radius: 18, child: const Icon(Icons.group, size: 20))
+            else
+              UserAvatar(
+                photoUrl: widget.other?.photoUrl,
+                name: widget.other?.displayName ?? 'Chat',
+                size: 36,
+              ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                widget.other?.displayName ?? 'Conversación',
+                widget.isGroup
+                    ? (widget.groupName ?? 'Grupo')
+                    : (widget.other?.displayName ?? 'Conversación'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -141,6 +154,7 @@ class _ChatConversationScreenState
                       _MessageBubble(
                         message: message,
                         mine: mine,
+                        showSender: widget.isGroup && !mine,
                         onLongPress: mine
                             ? () => _deleteMessage(message)
                             : null,
@@ -221,19 +235,25 @@ class _DaySeparator extends StatelessWidget {
   }
 }
 
-class _MessageBubble extends StatelessWidget {
+class _MessageBubble extends ConsumerWidget {
   const _MessageBubble({
     required this.message,
     required this.mine,
+    this.showSender = false,
     this.onLongPress,
   });
 
   final ChatMessage message;
   final bool mine;
+  final bool showSender;
   final VoidCallback? onLongPress;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // En grupos, nombre del emisor sobre las burbujas ajenas.
+    final sender = showSender
+        ? ref.watch(chatUserProvider(message.senderUid)).value
+        : null;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -260,6 +280,20 @@ class _MessageBubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              if (sender != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      sender.displayName,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               Text(
                 message.text,
                 style: theme.textTheme.bodyMedium?.copyWith(

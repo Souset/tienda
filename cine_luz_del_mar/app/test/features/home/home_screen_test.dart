@@ -3,6 +3,7 @@ import 'package:cine_luz_del_mar/features/home/presentation/providers/home_provi
 import 'package:cine_luz_del_mar/features/home/presentation/screens/home_screen.dart';
 import 'package:cine_luz_del_mar/shared/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:cine_luz_del_mar/shared/widgets/brand_wordmark.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -91,7 +92,7 @@ void main() {
     );
     await settle(tester);
 
-    expect(find.text('Cine Luz del Mar'), findsOneWidget);
+    expect(find.byType(BrandWordmark), findsOneWidget);
     expect(find.text('Ciclo de cine de verano'), findsOneWidget);
     expect(find.text('Próximas actividades'), findsOneWidget);
     expect(find.text('Noche de cine clásico'), findsOneWidget);

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-/// Logotipo "Cine Luz del Mar" en caligrafía, fiel al logo original de la
-/// asociación (script blanco sobre negro). Se adapta al tema activo.
+/// Logotipo "Cine Luz del Mar": calco vectorizado del logo original de la
+/// asociación (assets/brand), tintado según el tema activo.
+///
+/// `fontSize` se mantiene por compatibilidad con los puntos de uso: define
+/// la altura visual equivalente del logotipo.
 class BrandWordmark extends StatelessWidget {
   const BrandWordmark({super.key, this.fontSize = 36, this.color});
 
@@ -11,15 +13,17 @@ class BrandWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'Cine Luz del Mar',
-      textAlign: TextAlign.center,
-      style: GoogleFonts.greatVibes(
-        fontSize: fontSize,
+    return Semantics(
+      label: 'Cine Luz del Mar',
+      image: true,
+      child: Image.asset(
+        'assets/brand/logo_wordmark_white.png',
+        height: fontSize * 1.15,
         color: color ?? Theme.of(context).colorScheme.onSurface,
-        height: 1.1,
+        colorBlendMode: BlendMode.srcIn,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
       ),
-      semanticsLabel: 'Cine Luz del Mar',
     );
   }
 }
