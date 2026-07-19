@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../features/admin/presentation/screens/admin_screen.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
+import '../../features/agenda/presentation/screens/event_detail_screen.dart';
 import '../../features/assistant/presentation/screens/assistant_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -12,11 +13,13 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
 import '../../features/chat/presentation/screens/chat_list_screen.dart';
 import '../../features/community/presentation/screens/community_screen.dart';
+import '../../features/films/presentation/screens/film_detail_screen.dart';
 import '../../features/films/presentation/screens/films_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/library/presentation/screens/library_screen.dart';
 import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/members/presentation/screens/member_card_screen.dart';
+import '../../features/news/presentation/screens/news_detail_screen.dart';
 import '../../features/news/presentation/screens/news_list_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -167,10 +170,29 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.news,
         builder: (context, state) => const NewsListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                NewsDetailScreen(newsId: state.pathParameters['id']!),
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.films,
         builder: (context, state) => const FilmsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                FilmDetailScreen(filmId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '${AppRoutes.agenda}/:id',
+        builder: (context, state) =>
+            EventDetailScreen(eventId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.memberCard,
