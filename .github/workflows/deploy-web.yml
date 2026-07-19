@@ -1,0 +1,45 @@
+name: Deploy web a Firebase Hosting
+
+# Despliegue manual (workflow_dispatch) o automático al fusionar en master.
+# Requiere el secreto FIREBASE_SERVICE_ACCOUNT: contenido del JSON de una
+# service account con rol "Firebase Hosting Admin" (Settings → Secrets).
+# Ver docs/SETUP.md del proyecto.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main]
+    paths: ['cine_luz_del_mar/app/**', 'cine_luz_del_mar/firebase/**']
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ vars.FIREBASE_PROJECT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Build web
+        working-directory: cine_luz_del_mar/app
+        run: |
+          flutter pub get
+          flutter build web --release \
+            --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }}
+
+      - name: Deploy a Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ vars.FIREBASE_PROJECT_ID }}
+          channelId: live
+          entryPoint: cine_luz_del_mar/firebase
