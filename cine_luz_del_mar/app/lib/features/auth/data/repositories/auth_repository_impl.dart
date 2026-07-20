@@ -143,7 +143,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await user.updateDisplayName(name.trim());
       await _ensureUserDoc(user);
-      await user.sendEmailVerification();
+      // El envío del correo de verificación no debe frustrar el registro:
+      // la pantalla de verificación permite reenviarlo en cualquier momento.
+      try {
+        await user.sendEmailVerification();
+      } catch (error) {
+        debugPrint('Verificación no enviada (se podrá reenviar): $error');
+      }
     } on FirebaseAuthException catch (error) {
       throw _mapFirebaseError(error);
     }

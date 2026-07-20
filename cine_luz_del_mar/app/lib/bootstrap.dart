@@ -37,6 +37,8 @@ Future<void> _initFirebase() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ).timeout(const Duration(seconds: 12));
+    // Correos de Firebase (verificación, recuperación) en español.
+    await FirebaseAuth.instance.setLanguageCode('es');
     if (AppConfig.useEmulators) {
       await FirebaseAuth.instance.useAuthEmulator(
         AppConfig.emulatorHost,

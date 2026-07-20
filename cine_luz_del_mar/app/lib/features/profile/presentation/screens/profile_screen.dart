@@ -104,6 +104,19 @@ class _ProfileBody extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         const Divider(),
+        if (!ref.watch(emailVerifiedProvider))
+          ListTile(
+            leading: Icon(
+              Icons.mark_email_unread_outlined,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: const Text('Correo sin verificar'),
+            subtitle: const Text(
+              'Verifícalo para poder publicar, comentar y valorar',
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/acceso/verificar'),
+          ),
         ListTile(
           leading: const Icon(Icons.badge_outlined),
           title: const Text('Carné de socio'),
