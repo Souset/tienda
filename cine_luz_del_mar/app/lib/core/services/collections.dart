@@ -11,6 +11,7 @@ abstract final class Col {
   static const String friendships = 'friendships';
   static const String library = 'library';
   static const String members = 'members';
+  static const String membershipPlans = 'membership_plans';
   static const String chats = 'chats';
   static const String notifications = 'notifications';
   static const String certificates = 'certificates';

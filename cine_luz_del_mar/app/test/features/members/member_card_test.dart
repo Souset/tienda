@@ -110,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Todavía no eres socio'), findsOneWidget);
-    expect(find.textContaining('Habla con la junta'), findsOneWidget);
+    expect(find.text('Ver packs de socio'), findsOneWidget);
     expect(find.text('Socio nº 0001'), findsNothing);
   });
 }

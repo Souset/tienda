@@ -12,5 +12,6 @@ export 'friendship.dart';
 export 'home_config.dart';
 export 'library_resource.dart';
 export 'member.dart';
+export 'membership_plan.dart';
 export 'news_item.dart';
 export 'post.dart';

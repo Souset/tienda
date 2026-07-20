@@ -18,6 +18,7 @@ import '../../features/films/presentation/screens/films_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/library/presentation/screens/library_screen.dart';
 import '../../features/map/presentation/screens/map_screen.dart';
+import '../../features/members/presentation/screens/become_member_screen.dart';
 import '../../features/members/presentation/screens/member_card_screen.dart';
 import '../../features/news/presentation/screens/news_detail_screen.dart';
 import '../../features/news/presentation/screens/news_list_screen.dart';
@@ -38,6 +39,9 @@ abstract final class AppRoutes {
   static const news = '/noticias';
   static const films = '/peliculas';
   static const memberCard = '/carne';
+  static const becomeMember = '/socio';
+  static const paymentOk = '/socio/pago-ok';
+  static const paymentCancelled = '/socio/pago-cancelado';
   static const notifications = '/notificaciones';
   static const chat = '/chat';
   static const search = '/buscar';
@@ -52,6 +56,9 @@ abstract final class AppRoutes {
 /// Rutas que exigen sesión iniciada.
 const _protectedRoutes = <String>{
   AppRoutes.memberCard,
+  AppRoutes.becomeMember,
+  AppRoutes.paymentOk,
+  AppRoutes.paymentCancelled,
   AppRoutes.chat,
   AppRoutes.notifications,
   AppRoutes.assistant,
@@ -204,6 +211,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.memberCard,
         builder: (context, state) => const MemberCardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.becomeMember,
+        builder: (context, state) => const BecomeMemberScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentOk,
+        builder: (context, state) => const PaymentResultScreen(success: true),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentCancelled,
+        builder: (context, state) => const PaymentResultScreen(success: false),
       ),
       GoRoute(
         path: AppRoutes.notifications,

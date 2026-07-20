@@ -9,7 +9,8 @@ import '../../domain/repositories/members_repository.dart';
 /// Implementación de [MembersRepository] con Cloud Firestore.
 ///
 /// Respeta el contrato de las reglas de seguridad:
-/// - `members/{uid}` y `members/{uid}/fees`: lee el propio socio o junta+.
+/// - `members/{uid}`: lee el propio socio o coordinador+ (check-in manual);
+///   `members/{uid}/fees`: lee el propio socio o junta+.
 /// - `attendance/{uid}/records`: lee el propio socio o coordinador+.
 /// - El check-in (update de la reserva + set del registro de asistencia) lo
 ///   ejecuta un coordinador+ en un único batch atómico.

@@ -18,6 +18,13 @@ abstract class Member with _$Member {
 
     /// Estado del socio: `active` | `suspended` | `left`.
     @Default('active') String status,
+
+    /// Pack de socio elegido (referencia a `membership_plans`).
+    String? planId,
+    String? planName,
+
+    /// Periodicidad del pack: `anual` | `mensual` | `unica`.
+    String? planPeriod,
     @NullableTimestampConverter() DateTime? joinedAt,
     @Default(<String>[]) List<String> benefits,
     @NullableTimestampConverter() DateTime? createdAt,
@@ -42,6 +49,7 @@ abstract class MemberFee with _$MemberFee {
     @Default('pending') String status,
     @NullableTimestampConverter() DateTime? paidAt,
     String? method,
+    String? planName,
   }) = _MemberFee;
 
   factory MemberFee.fromJson(Map<String, dynamic> json) =>

@@ -64,6 +64,13 @@ function http_post_json(string $url, array $body, array $headers = []): array
     return http_request('POST', $url, json_encode($body), $headers);
 }
 
+/** POST con cuerpo application/x-www-form-urlencoded (API de Stripe). */
+function http_post_form(string $url, array $body, array $headers = []): array
+{
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+    return http_request('POST', $url, http_build_query($body), $headers);
+}
+
 function http_request(string $method, string $url, ?string $body, array $headers): array
 {
     $ch = curl_init($url);
@@ -277,6 +284,28 @@ function firestore_patch(string $path, array $fields, array $updateMask = []): b
         ]
     );
     return $status === 200;
+}
+
+/** Nombre completo de un documento para las escrituras de :commit. */
+function fs_doc_name(string $path): string
+{
+    $project = config()['firebase_project_id'];
+    return "projects/$project/databases/(default)/documents/$path";
+}
+
+/**
+ * Commit atómico de varias escrituras (con precondiciones opcionales).
+ * Devuelve [status, respuesta]; status 200 = todas aplicadas.
+ */
+function firestore_commit(array $writes): array
+{
+    $project = config()['firebase_project_id'];
+    return http_post_json(
+        "https://firestore.googleapis.com/v1/projects/$project"
+            . '/databases/(default)/documents:commit',
+        ['writes' => $writes],
+        ['Authorization: Bearer ' . google_access_token()]
+    );
 }
 
 function firestore_query(array $structuredQuery): array

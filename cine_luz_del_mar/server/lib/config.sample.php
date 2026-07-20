@@ -51,7 +51,18 @@ return [
     // Genera una larga y aleatoria: bin2hex(random_bytes(32)).
     'cron_secret' => 'CAMBIA_ESTA_CLAVE',
 
-    // Pagos (futuro): mantener en false hasta activar Stripe.
+    // URL pública de la app (para las redirecciones de vuelta tras el pago).
+    'app_base_url' => 'https://TU_DOMINIO',
+
+    // Pagos con Stripe (cuotas de socio).
+    //   1. Crea tu cuenta gratuita en https://dashboard.stripe.com/register
+    //   2. Copia la clave secreta (sk_live_... o sk_test_...) en
+    //      stripe_secret_key.
+    //   3. Crea un webhook apuntando a
+    //      https://TU_DOMINIO/cine-api/api/stripe_webhook.php con el evento
+    //      checkout.session.completed y copia su signing secret (whsec_...).
+    //   4. Pon stripe_enabled en true.
     'stripe_enabled' => false,
+    'stripe_secret_key' => '',
     'stripe_webhook_secret' => '',
 ];

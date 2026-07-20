@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 mixin _$Member {
 
 @JsonKey(includeFromJson: false, includeToJson: false) String get id; int get memberNumber;/// Estado del socio: `active` | `suspended` | `left`.
- String get status;@NullableTimestampConverter() DateTime? get joinedAt; List<String> get benefits;@NullableTimestampConverter() DateTime? get createdAt;@NullableTimestampConverter() DateTime? get updatedAt;
+ String get status;/// Pack de socio elegido (referencia a `membership_plans`).
+ String? get planId; String? get planName;/// Periodicidad del pack: `anual` | `mensual` | `unica`.
+ String? get planPeriod;@NullableTimestampConverter() DateTime? get joinedAt; List<String> get benefits;@NullableTimestampConverter() DateTime? get createdAt;@NullableTimestampConverter() DateTime? get updatedAt;
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +31,16 @@ $MemberCopyWith<Member> get copyWith => _$MemberCopyWithImpl<Member>(this as Mem
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, id) || other.id == id)&&(identical(other.memberNumber, memberNumber) || other.memberNumber == memberNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&const DeepCollectionEquality().equals(other.benefits, benefits)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.id, id) || other.id == id)&&(identical(other.memberNumber, memberNumber) || other.memberNumber == memberNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planPeriod, planPeriod) || other.planPeriod == planPeriod)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&const DeepCollectionEquality().equals(other.benefits, benefits)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,memberNumber,status,joinedAt,const DeepCollectionEquality().hash(benefits),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,memberNumber,status,planId,planName,planPeriod,joinedAt,const DeepCollectionEquality().hash(benefits),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Member(id: $id, memberNumber: $memberNumber, status: $status, joinedAt: $joinedAt, benefits: $benefits, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Member(id: $id, memberNumber: $memberNumber, status: $status, planId: $planId, planName: $planName, planPeriod: $planPeriod, joinedAt: $joinedAt, benefits: $benefits, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -49,7 +51,7 @@ abstract mixin class $MemberCopyWith<$Res>  {
   factory $MemberCopyWith(Member value, $Res Function(Member) _then) = _$MemberCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, int memberNumber, String status,@NullableTimestampConverter() DateTime? joinedAt, List<String> benefits,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
+@JsonKey(includeFromJson: false, includeToJson: false) String id, int memberNumber, String status, String? planId, String? planName, String? planPeriod,@NullableTimestampConverter() DateTime? joinedAt, List<String> benefits,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
 });
 
 
@@ -66,12 +68,15 @@ class _$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? memberNumber = null,Object? status = null,Object? joinedAt = freezed,Object? benefits = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? memberNumber = null,Object? status = null,Object? planId = freezed,Object? planName = freezed,Object? planPeriod = freezed,Object? joinedAt = freezed,Object? benefits = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,memberNumber: null == memberNumber ? _self.memberNumber : memberNumber // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
+as String,planId: freezed == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
+as String?,planName: freezed == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
+as String?,planPeriod: freezed == planPeriod ? _self.planPeriod : planPeriod // ignore: cast_nullable_to_non_nullable
+as String?,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,benefits: null == benefits ? _self.benefits : benefits // ignore: cast_nullable_to_non_nullable
 as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -160,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status,  String? planId,  String? planName,  String? planPeriod, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.memberNumber,_that.status,_that.planId,_that.planName,_that.planPeriod,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -181,10 +186,10 @@ return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.be
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status,  String? planId,  String? planName,  String? planPeriod, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Member():
-return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.memberNumber,_that.status,_that.planId,_that.planName,_that.planPeriod,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +206,10 @@ return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.be
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  int memberNumber,  String status,  String? planId,  String? planName,  String? planPeriod, @NullableTimestampConverter()  DateTime? joinedAt,  List<String> benefits, @NullableTimestampConverter()  DateTime? createdAt, @NullableTimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.memberNumber,_that.status,_that.planId,_that.planName,_that.planPeriod,_that.joinedAt,_that.benefits,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -216,13 +221,18 @@ return $default(_that.id,_that.memberNumber,_that.status,_that.joinedAt,_that.be
 @JsonSerializable()
 
 class _Member extends Member {
-  const _Member({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.memberNumber = 0, this.status = 'active', @NullableTimestampConverter() this.joinedAt, final  List<String> benefits = const <String>[], @NullableTimestampConverter() this.createdAt, @NullableTimestampConverter() this.updatedAt}): _benefits = benefits,super._();
+  const _Member({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.memberNumber = 0, this.status = 'active', this.planId, this.planName, this.planPeriod, @NullableTimestampConverter() this.joinedAt, final  List<String> benefits = const <String>[], @NullableTimestampConverter() this.createdAt, @NullableTimestampConverter() this.updatedAt}): _benefits = benefits,super._();
   factory _Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 
 @override@JsonKey(includeFromJson: false, includeToJson: false) final  String id;
 @override@JsonKey() final  int memberNumber;
 /// Estado del socio: `active` | `suspended` | `left`.
 @override@JsonKey() final  String status;
+/// Pack de socio elegido (referencia a `membership_plans`).
+@override final  String? planId;
+@override final  String? planName;
+/// Periodicidad del pack: `anual` | `mensual` | `unica`.
+@override final  String? planPeriod;
 @override@NullableTimestampConverter() final  DateTime? joinedAt;
  final  List<String> _benefits;
 @override@JsonKey() List<String> get benefits {
@@ -247,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.memberNumber, memberNumber) || other.memberNumber == memberNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&const DeepCollectionEquality().equals(other._benefits, _benefits)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.id, id) || other.id == id)&&(identical(other.memberNumber, memberNumber) || other.memberNumber == memberNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.planName, planName) || other.planName == planName)&&(identical(other.planPeriod, planPeriod) || other.planPeriod == planPeriod)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&const DeepCollectionEquality().equals(other._benefits, _benefits)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,memberNumber,status,joinedAt,const DeepCollectionEquality().hash(_benefits),createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,memberNumber,status,planId,planName,planPeriod,joinedAt,const DeepCollectionEquality().hash(_benefits),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Member(id: $id, memberNumber: $memberNumber, status: $status, joinedAt: $joinedAt, benefits: $benefits, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Member(id: $id, memberNumber: $memberNumber, status: $status, planId: $planId, planName: $planName, planPeriod: $planPeriod, joinedAt: $joinedAt, benefits: $benefits, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -267,7 +277,7 @@ abstract mixin class _$MemberCopyWith<$Res> implements $MemberCopyWith<$Res> {
   factory _$MemberCopyWith(_Member value, $Res Function(_Member) _then) = __$MemberCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, int memberNumber, String status,@NullableTimestampConverter() DateTime? joinedAt, List<String> benefits,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
+@JsonKey(includeFromJson: false, includeToJson: false) String id, int memberNumber, String status, String? planId, String? planName, String? planPeriod,@NullableTimestampConverter() DateTime? joinedAt, List<String> benefits,@NullableTimestampConverter() DateTime? createdAt,@NullableTimestampConverter() DateTime? updatedAt
 });
 
 
@@ -284,12 +294,15 @@ class __$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? memberNumber = null,Object? status = null,Object? joinedAt = freezed,Object? benefits = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? memberNumber = null,Object? status = null,Object? planId = freezed,Object? planName = freezed,Object? planPeriod = freezed,Object? joinedAt = freezed,Object? benefits = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_Member(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,memberNumber: null == memberNumber ? _self.memberNumber : memberNumber // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
+as String,planId: freezed == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
+as String?,planName: freezed == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
+as String?,planPeriod: freezed == planPeriod ? _self.planPeriod : planPeriod // ignore: cast_nullable_to_non_nullable
+as String?,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,benefits: null == benefits ? _self._benefits : benefits // ignore: cast_nullable_to_non_nullable
 as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -305,7 +318,7 @@ as DateTime?,
 mixin _$MemberFee {
 
 @JsonKey(includeFromJson: false, includeToJson: false) String get id; double get amount;/// Estado de la cuota: `paid` | `pending` | `exempt`.
- String get status;@NullableTimestampConverter() DateTime? get paidAt; String? get method;
+ String get status;@NullableTimestampConverter() DateTime? get paidAt; String? get method; String? get planName;
 /// Create a copy of MemberFee
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -318,16 +331,16 @@ $MemberFeeCopyWith<MemberFee> get copyWith => _$MemberFeeCopyWithImpl<MemberFee>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberFee&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.method, method) || other.method == method));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberFee&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.method, method) || other.method == method)&&(identical(other.planName, planName) || other.planName == planName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,amount,status,paidAt,method);
+int get hashCode => Object.hash(runtimeType,id,amount,status,paidAt,method,planName);
 
 @override
 String toString() {
-  return 'MemberFee(id: $id, amount: $amount, status: $status, paidAt: $paidAt, method: $method)';
+  return 'MemberFee(id: $id, amount: $amount, status: $status, paidAt: $paidAt, method: $method, planName: $planName)';
 }
 
 
@@ -338,7 +351,7 @@ abstract mixin class $MemberFeeCopyWith<$Res>  {
   factory $MemberFeeCopyWith(MemberFee value, $Res Function(MemberFee) _then) = _$MemberFeeCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, double amount, String status,@NullableTimestampConverter() DateTime? paidAt, String? method
+@JsonKey(includeFromJson: false, includeToJson: false) String id, double amount, String status,@NullableTimestampConverter() DateTime? paidAt, String? method, String? planName
 });
 
 
@@ -355,13 +368,14 @@ class _$MemberFeeCopyWithImpl<$Res>
 
 /// Create a copy of MemberFee
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? amount = null,Object? status = null,Object? paidAt = freezed,Object? method = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? amount = null,Object? status = null,Object? paidAt = freezed,Object? method = freezed,Object? planName = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,paidAt: freezed == paidAt ? _self.paidAt : paidAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,method: freezed == method ? _self.method : method // ignore: cast_nullable_to_non_nullable
+as String?,planName: freezed == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -447,10 +461,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method,  String? planName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MemberFee() when $default != null:
-return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);case _:
+return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method,_that.planName);case _:
   return orElse();
 
 }
@@ -468,10 +482,10 @@ return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method,  String? planName)  $default,) {final _that = this;
 switch (_that) {
 case _MemberFee():
-return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);case _:
+return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method,_that.planName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -488,10 +502,10 @@ return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(includeFromJson: false, includeToJson: false)  String id,  double amount,  String status, @NullableTimestampConverter()  DateTime? paidAt,  String? method,  String? planName)?  $default,) {final _that = this;
 switch (_that) {
 case _MemberFee() when $default != null:
-return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);case _:
+return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method,_that.planName);case _:
   return null;
 
 }
@@ -503,7 +517,7 @@ return $default(_that.id,_that.amount,_that.status,_that.paidAt,_that.method);ca
 @JsonSerializable()
 
 class _MemberFee extends MemberFee {
-  const _MemberFee({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.amount = 0, this.status = 'pending', @NullableTimestampConverter() this.paidAt, this.method}): super._();
+  const _MemberFee({@JsonKey(includeFromJson: false, includeToJson: false) this.id = '', this.amount = 0, this.status = 'pending', @NullableTimestampConverter() this.paidAt, this.method, this.planName}): super._();
   factory _MemberFee.fromJson(Map<String, dynamic> json) => _$MemberFeeFromJson(json);
 
 @override@JsonKey(includeFromJson: false, includeToJson: false) final  String id;
@@ -512,6 +526,7 @@ class _MemberFee extends MemberFee {
 @override@JsonKey() final  String status;
 @override@NullableTimestampConverter() final  DateTime? paidAt;
 @override final  String? method;
+@override final  String? planName;
 
 /// Create a copy of MemberFee
 /// with the given fields replaced by the non-null parameter values.
@@ -526,16 +541,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberFee&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.method, method) || other.method == method));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberFee&&(identical(other.id, id) || other.id == id)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.method, method) || other.method == method)&&(identical(other.planName, planName) || other.planName == planName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,amount,status,paidAt,method);
+int get hashCode => Object.hash(runtimeType,id,amount,status,paidAt,method,planName);
 
 @override
 String toString() {
-  return 'MemberFee(id: $id, amount: $amount, status: $status, paidAt: $paidAt, method: $method)';
+  return 'MemberFee(id: $id, amount: $amount, status: $status, paidAt: $paidAt, method: $method, planName: $planName)';
 }
 
 
@@ -546,7 +561,7 @@ abstract mixin class _$MemberFeeCopyWith<$Res> implements $MemberFeeCopyWith<$Re
   factory _$MemberFeeCopyWith(_MemberFee value, $Res Function(_MemberFee) _then) = __$MemberFeeCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(includeFromJson: false, includeToJson: false) String id, double amount, String status,@NullableTimestampConverter() DateTime? paidAt, String? method
+@JsonKey(includeFromJson: false, includeToJson: false) String id, double amount, String status,@NullableTimestampConverter() DateTime? paidAt, String? method, String? planName
 });
 
 
@@ -563,13 +578,14 @@ class __$MemberFeeCopyWithImpl<$Res>
 
 /// Create a copy of MemberFee
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? amount = null,Object? status = null,Object? paidAt = freezed,Object? method = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? amount = null,Object? status = null,Object? paidAt = freezed,Object? method = freezed,Object? planName = freezed,}) {
   return _then(_MemberFee(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,paidAt: freezed == paidAt ? _self.paidAt : paidAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,method: freezed == method ? _self.method : method // ignore: cast_nullable_to_non_nullable
+as String?,planName: freezed == planName ? _self.planName : planName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

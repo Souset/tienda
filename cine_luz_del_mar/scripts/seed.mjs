@@ -210,6 +210,33 @@ for (const role of ['presidente', 'junta', 'coordinador', 'socio']) {
 }
 await db.doc('counters/members').set({ value: n - 1 });
 
+console.log('Creando packs de socio…');
+const packs = [
+  ['joven', 'Socio Joven', 'Para menores de 30 años y estudiantes.', 15, false],
+  ['general', 'Socio General', 'La cuota clásica de la asociación.', 25, true],
+  ['familiar', 'Socio Familiar', 'Dos personas adultas y menores a cargo.', 40, false],
+  ['protector', 'Socio Protector', 'Para quienes quieren apoyar más al cine.', 60, false],
+];
+let orden = 0;
+for (const [id, name, description, price, highlight] of packs) {
+  await db.doc(`membership_plans/${id}`).set({
+    name,
+    description,
+    price,
+    period: 'anual',
+    benefits: [
+      'Entrada libre a todas las proyecciones',
+      'Descuento en talleres',
+      'Carné digital y boletín semanal',
+    ],
+    active: true,
+    highlight,
+    order: orden++,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 console.log('Creando comunidad…');
 await db.doc('posts/bienvenida').set({
   authorUid: uids.socio,

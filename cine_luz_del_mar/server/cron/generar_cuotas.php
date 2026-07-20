@@ -26,10 +26,26 @@ if (PHP_SAPI !== 'cli') {
 
 $year = (string) (int) date('Y');
 
-$amount = 20.0;
+// Importe por defecto si el socio no tiene pack asignado.
+$defaultAmount = 20.0;
 $features = firestore_get('app_config/features');
 if ($features !== null && fs_field($features, 'feeAmount') !== null) {
-    $amount = (float) fs_field($features, 'feeAmount');
+    $defaultAmount = (float) fs_field($features, 'feeAmount');
+}
+
+// Precios y periodicidad por pack (membership_plans): la cuota anual se
+// genera con el importe del pack de cada socio. Los packs de pago único o
+// mensuales quedan fuera de este cron (la única no se renueva; la mensual
+// la paga el socio desde la app mes a mes).
+$planPrices = [];
+$planPeriods = [];
+foreach (firestore_query([
+    'from' => [['collectionId' => 'membership_plans']],
+    'limit' => 100,
+]) as $row) {
+    $planId = basename((string) $row['document']['name']);
+    $planPrices[$planId] = (float) (fs_field($row['document'], 'price') ?? 0);
+    $planPeriods[$planId] = (string) (fs_field($row['document'], 'period') ?? 'anual');
 }
 
 $members = firestore_query([
@@ -51,9 +67,19 @@ foreach ($members as $row) {
     if (firestore_get($feePath) !== null) {
         continue; // La cuota de este año ya existe.
     }
+    $planId = (string) (fs_field($row['document'], 'planId') ?? '');
+    $period = (string) (fs_field($row['document'], 'planPeriod')
+        ?? $planPeriods[$planId] ?? 'anual');
+    if ($period !== 'anual') {
+        continue; // Pago único o mensual: sin cuota anual generada.
+    }
+    $amount = ($planPrices[$planId] ?? 0) > 0
+        ? $planPrices[$planId]
+        : $defaultAmount;
     $ok = firestore_patch($feePath, [
         'amount' => ['doubleValue' => $amount],
         'status' => ['stringValue' => 'pending'],
+        'planId' => ['stringValue' => $planId],
     ]);
     if ($ok) {
         $created++;

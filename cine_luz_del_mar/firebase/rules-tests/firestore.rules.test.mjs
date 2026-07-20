@@ -113,6 +113,28 @@ beforeEach(async () => {
       memberNumber: 1,
       status: 'active',
     });
+    await setDoc(doc(db, 'members', 'socio-1', 'fees', '2025'), {
+      amount: 25,
+      status: 'pending',
+    });
+    await setDoc(doc(db, 'membership_plans', 'p-general'), {
+      name: 'Socio General',
+      price: 25,
+      period: 'anual',
+      active: true,
+      order: 1,
+    });
+    await setDoc(doc(db, 'membership_plans', 'p-oculto'), {
+      name: 'Pack retirado',
+      price: 10,
+      period: 'anual',
+      active: false,
+      order: 9,
+    });
+    await setDoc(doc(db, 'stripe_payments', 'cs_test_1'), {
+      uid: 'socio-1',
+      amount: 25,
+    });
     await setDoc(doc(db, 'chats', 'c-1'), {
       type: 'direct',
       memberUids: ['socio-1', 'socio-2'],
@@ -262,13 +284,15 @@ describe('películas', () => {
       ),
     ));
 
-  it('un socio solo toca los agregados de valoración', async () => {
-    await assertSucceeds(
-      updateDoc(doc(ctx('socio-1'), 'films', 'f-1'), {
-        avgRating: 4.5,
-        ratingsCount: 1,
-      }),
-    );
+  it('un socio toca los agregados solo junto a su valoración', async () => {
+    const db = ctx('socio-1');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'films', 'f-1', 'ratings', 'socio-1'), { score: 4.5 });
+    batch.update(doc(db, 'films', 'f-1'), {
+      avgRating: 4.5,
+      ratingsCount: 1,
+    });
+    await assertSucceeds(batch.commit());
     await assertFails(
       updateDoc(doc(ctx('socio-1'), 'films', 'f-1'), { title: 'Hackeada' }),
     );
@@ -343,6 +367,85 @@ describe('socios y cuotas', () => {
         memberNumber: 99,
         status: 'active',
       }),
+    );
+  });
+});
+
+describe('packs de socio (membership_plans)', () => {
+  it('cualquiera lee packs activos; los inactivos solo junta+', async () => {
+    const anon = env.unauthenticatedContext().firestore();
+    await assertSucceeds(getDoc(doc(anon, 'membership_plans', 'p-general')));
+    await assertFails(
+      getDoc(doc(ctx('socio-1'), 'membership_plans', 'p-oculto')),
+    );
+    await assertSucceeds(
+      getDoc(doc(ctx('junta-1'), 'membership_plans', 'p-oculto')),
+    );
+  });
+
+  it('listado: público con filtro active; sin filtro solo junta+', async () => {
+    const anon = env.unauthenticatedContext().firestore();
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(anon, 'membership_plans'),
+          where('active', '==', true),
+        ),
+      ),
+    );
+    await assertFails(getDocs(collection(ctx('socio-1'), 'membership_plans')));
+    await assertSucceeds(
+      getDocs(collection(ctx('junta-1'), 'membership_plans')),
+    );
+  });
+
+  it('solo junta+ crea, edita o borra packs (los precios son intocables)', async () => {
+    await assertSucceeds(
+      setDoc(doc(ctx('junta-1'), 'membership_plans', 'p-nuevo'), {
+        name: 'Socio Joven',
+        price: 15,
+        period: 'anual',
+        active: true,
+        order: 0,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(ctx('socio-1'), 'membership_plans', 'p-hack'), {
+        name: 'Gratis',
+        price: 0.5,
+        active: true,
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'membership_plans', 'p-general'), {
+        price: 0.5,
+      }),
+    );
+    await assertFails(
+      deleteDoc(doc(ctx('coord-1'), 'membership_plans', 'p-general')),
+    );
+  });
+
+  it('nadie se auto-paga la cuota ni toca los pagos de Stripe', async () => {
+    // Un socio no puede marcarse la cuota como pagada (solo junta+ o el
+    // webhook del servidor, que usa la service account).
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'members', 'socio-1', 'fees', '2025'), {
+        status: 'paid',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(ctx('socio-1'), 'members', 'socio-1', 'fees', '2026'), {
+        amount: 0,
+        status: 'paid',
+      }),
+    );
+    // stripe_payments es solo de servidor: ni leer el propio, ni escribir.
+    await assertFails(
+      getDoc(doc(ctx('socio-1'), 'stripe_payments', 'cs_test_1')),
+    );
+    await assertFails(
+      setDoc(doc(ctx('admin-1'), 'stripe_payments', 'cs_fake'), { uid: 'x' }),
     );
   });
 });
@@ -443,6 +546,130 @@ describe('consultas de listado', () => {
   it('coordinador lista noticias y eventos sin filtro de estado', async () => {
     await assertSucceeds(getDocs(collection(ctx('coord-1'), 'news')));
     await assertSucceeds(getDocs(collection(ctx('coord-1'), 'events')));
+  });
+});
+
+describe('auditoría adversarial', () => {
+  it('nadie infla el contador de reservas sin su reserva en la transacción', async () => {
+    // +1 en solitario (llenar el evento artificialmente): denegado.
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'events', 'e-1'), { reservedCount: 1 }),
+    );
+    // -1 en solitario (vaciar un evento lleno para sobrevender): denegado.
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'events', 'e-lleno'), {
+        reservedCount: 0,
+      }),
+    );
+    // La reserva legítima (reserva + contador en el mismo batch) funciona.
+    const db = ctx('socio-1');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'events', 'e-1', 'reservations', 'socio-1'), {
+      status: 'active',
+    });
+    batch.update(doc(db, 'events', 'e-1'), { reservedCount: increment(1) });
+    await assertSucceeds(batch.commit());
+  });
+
+  it('nadie falsea los agregados de valoración de una película', async () => {
+    // Tocar los agregados sin valoración propia en la transacción: denegado.
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'films', 'f-1'), {
+        avgRating: 5,
+        ratingsCount: 9999,
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(ctx('socio-1'), 'films', 'f-1'), {
+        avgRating: 5,
+        ratingsCount: 1,
+      }),
+    );
+    // La valoración legítima (rating + agregados en el mismo batch) funciona.
+    const db = ctx('socio-1');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'films', 'f-1', 'ratings', 'socio-1'), { score: 4 });
+    batch.update(doc(db, 'films', 'f-1'), { avgRating: 4, ratingsCount: 1 });
+    await assertSucceeds(batch.commit());
+    // Saltos de contador mayores que 1, incluso con rating propio: denegado.
+    const batch2 = writeBatch(db);
+    batch2.set(doc(db, 'films', 'f-1', 'ratings', 'socio-1'), { score: 5 });
+    batch2.update(doc(db, 'films', 'f-1'), {
+      avgRating: 5,
+      ratingsCount: 500,
+    });
+    await assertFails(batch2.commit());
+  });
+
+  it('valoración post-evento: legítima sí, agregados en solitario no', async () => {
+    // e-1 no tiene aún feedbackAvg/feedbackCount: cubre los eventos creados
+    // antes de la función de valoraciones (.get() con valor por defecto).
+    const db = ctx('socio-1');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'events', 'e-1', 'feedback', 'socio-1'), { score: 5 });
+    batch.update(doc(db, 'events', 'e-1'), {
+      feedbackAvg: 5,
+      feedbackCount: 1,
+    });
+    await assertSucceeds(batch.commit());
+    await assertFails(
+      updateDoc(doc(ctx('socio-2'), 'events', 'e-1'), {
+        feedbackAvg: 1,
+        feedbackCount: 999,
+      }),
+    );
+  });
+
+  it('un presidente no puede tocar a un admin (ni degradarlo)', async () => {
+    await assertFails(
+      updateDoc(doc(ctx('presi-1'), 'users', 'admin-1'), { role: 'socio' }),
+    );
+    await assertFails(
+      updateDoc(doc(ctx('presi-1'), 'users', 'admin-1'), {
+        role: 'presidente',
+      }),
+    );
+    // El admin sí gestiona al presidente (rango superior).
+    await assertSucceeds(
+      updateDoc(doc(ctx('admin-1'), 'users', 'presi-1'), { role: 'junta' }),
+    );
+  });
+
+  it('app_config/features (claves de API) no es público', async () => {
+    await env.withSecurityRulesDisabled(async (admin) => {
+      await setDoc(doc(admin.firestore(), 'app_config', 'features'), {
+        tmdbApiKey: 'secreta',
+      });
+    });
+    await assertFails(
+      getDoc(doc(ctx('socio-1'), 'app_config', 'features')),
+    );
+    await assertSucceeds(
+      getDoc(doc(ctx('coord-1'), 'app_config', 'features')),
+    );
+    // El banner de la home sigue siendo público (lo usa la portada).
+    const anon = env.unauthenticatedContext().firestore();
+    await assertSucceeds(getDoc(doc(anon, 'app_config', 'home')));
+  });
+
+  it('coordinador lee socios (check-in manual); un socio no lee a otros', async () => {
+    await assertSucceeds(getDoc(doc(ctx('coord-1'), 'members', 'socio-1')));
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(ctx('coord-1'), 'members'),
+          where('memberNumber', '==', 1),
+        ),
+      ),
+    );
+    await assertFails(getDoc(doc(ctx('socio-2'), 'members', 'socio-1')));
+    // Las cuotas siguen restringidas a junta+.
+    await assertFails(
+      getDoc(doc(ctx('coord-1'), 'members', 'socio-1', 'fees', '2025')),
+    );
+    await assertSucceeds(
+      getDoc(doc(ctx('junta-1'), 'members', 'socio-1', 'fees', '2025')),
+    );
   });
 });
 

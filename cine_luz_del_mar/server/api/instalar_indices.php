@@ -46,6 +46,7 @@ $indexes = [
     ['chats', [$arr('memberUids'), $desc('lastMessageAt')]],
     ['friendships', [$arr('uids'), $asc('status')]],
     ['users', [$arr('searchTokens'), $asc('displayName')]],
+    ['membership_plans', [$asc('active'), $asc('order')]],
 ];
 
 $project = config()['firebase_project_id'];

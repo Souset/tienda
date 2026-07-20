@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -55,13 +56,14 @@ class MemberCardScreen extends ConsumerWidget {
         ),
         data: (member) {
           if (member == null) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.badge_outlined,
               title: 'Todavía no eres socio',
               message:
-                  'Hazte socio de la asociación para conseguir tu carné '
-                  'digital. Habla con la junta en cualquier actividad o '
-                  'escríbenos.',
+                  'Hazte socio de la asociación: elige tu pack, paga '
+                  'online y tu carné digital se activa al instante.',
+              actionLabel: 'Ver packs de socio',
+              onAction: () => context.push('/socio'),
             );
           }
           final displayName = user?.displayName.trim().isNotEmpty == true
@@ -94,7 +96,7 @@ class _MemberCardBody extends ConsumerWidget {
       children: [
         _DigitalCard(member: member, displayName: displayName),
         const SizedBox(height: 20),
-        _FeeStatusChip(fees: fees),
+        _FeeStatusChip(member: member, fees: fees),
         if (member.benefits.isNotEmpty) ...[
           const SizedBox(height: 24),
           _BenefitsSection(benefits: member.benefits),
@@ -156,7 +158,11 @@ class _DigitalCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Socio nº $number',
+                            member.planName?.isNotEmpty == true
+                                ? 'Socio nº $number · ${member.planName}'
+                                : 'Socio nº $number',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white70,
                             ),
@@ -202,19 +208,36 @@ class _DigitalCard extends StatelessWidget {
   }
 }
 
-/// Chip con el estado de la cuota del año en curso.
+/// Chip con el estado de la cuota del periodo en curso, según la
+/// periodicidad del pack del socio (anual, mensual o pago único).
 class _FeeStatusChip extends StatelessWidget {
-  const _FeeStatusChip({required this.fees});
+  const _FeeStatusChip({required this.member, required this.fees});
 
+  final Member member;
   final List<MemberFee> fees;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final year = DateTime.now().year;
+    final now = DateTime.now();
+    final period = member.planPeriod ?? 'anual';
+
+    // Pago único: con cualquier cuota pagada, el socio está al día siempre.
+    if (period == 'unica' && fees.any((f) => f.status == 'paid')) {
+      return _chipAndPay(
+        context,
+        icon: Icons.check_circle_rounded,
+        label: 'Cuota única pagada',
+        showPay: false,
+      );
+    }
+
+    final feeId = period == 'mensual'
+        ? '${now.year}-${now.month.toString().padLeft(2, '0')}'
+        : now.year.toString();
+    final periodLabel = period == 'mensual' ? 'del mes' : '${now.year}';
     MemberFee? current;
     for (final fee in fees) {
-      if (fee.id == year.toString()) {
+      if (fee.id == feeId) {
         current = fee;
         break;
       }
@@ -222,29 +245,54 @@ class _FeeStatusChip extends StatelessWidget {
     final status = current?.status ?? 'pending';
 
     final (IconData icon, String label) = switch (status) {
-      'paid' => (Icons.check_circle_rounded, 'Cuota $year pagada'),
-      'exempt' => (Icons.verified_rounded, 'Exento de cuota $year'),
-      _ => (Icons.schedule_rounded, 'Cuota $year pendiente'),
+      'paid' => (Icons.check_circle_rounded, 'Cuota $periodLabel pagada'),
+      'exempt' => (Icons.verified_rounded, 'Exento de cuota $periodLabel'),
+      _ => (Icons.schedule_rounded, 'Cuota $periodLabel pendiente'),
     };
+    return _chipAndPay(
+      context,
+      icon: icon,
+      label: label,
+      showPay: status == 'pending',
+    );
+  }
 
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          border: Border.all(color: theme.colorScheme.outlineVariant),
+  Widget _chipAndPay(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool showPay,
+  }) {
+    final theme = Theme.of(context);
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: theme.colorScheme.onSurface),
+              const SizedBox(width: 8),
+              Text(label, style: theme.textTheme.labelLarge),
+            ],
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.onSurface),
-            const SizedBox(width: 8),
-            Text(label, style: theme.textTheme.labelLarge),
-          ],
-        ),
-      ),
+        if (showPay)
+          FilledButton.icon(
+            onPressed: () => context.push('/socio'),
+            icon: const Icon(Icons.credit_card_outlined, size: 18),
+            label: const Text('Pagar online'),
+          ),
+      ],
     );
   }
 }

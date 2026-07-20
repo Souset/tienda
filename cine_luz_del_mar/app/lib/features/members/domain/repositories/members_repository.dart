@@ -18,8 +18,8 @@ abstract class MembersRepository {
 
   /// Busca un socio por su número (`memberNumber`), para el check-in manual.
   ///
-  /// Requiere permiso de lectura de la colección `members` (junta+). Lanza
-  /// [PermissionException] si el rol no puede listar socios.
+  /// Requiere permiso de lectura de la colección `members` (coordinador+).
+  /// Lanza [PermissionException] si el rol no puede listar socios.
   Future<Member?> findByMemberNumber(int number);
 
   /// Valida la entrada de un socio a un evento (acción de coordinador+).

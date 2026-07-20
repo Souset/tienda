@@ -273,6 +273,95 @@ class AdminRepository {
     }
   }
 
+  // ---------- Packs de socio (cuotas configurables) ----------
+
+  /// Todos los packs, también los inactivos (solo junta+ puede listarlos).
+  Stream<List<MembershipPlan>> watchAllPlans() => _firestore
+      .collection(Col.membershipPlans)
+      .orderBy('order')
+      .snapshots()
+      .map(
+        (snap) => [
+          for (final doc in snap.docs)
+            MembershipPlan.fromJson(doc.data()).copyWith(id: doc.id),
+        ],
+      );
+
+  Future<void> savePlan(MembershipPlan plan) =>
+      _save(Col.membershipPlans, plan.id, {
+        ...plan.toJson(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+  Future<void> deletePlan(String id) => deleteDocById(Col.membershipPlans, id);
+
+  /// Crea los packs de ejemplo iniciales (todo editable después).
+  Future<void> createDefaultPlans() async {
+    const defaults = [
+      MembershipPlan(
+        name: 'Socio Joven',
+        description: 'Para menores de 30 años y estudiantes.',
+        price: 15,
+        order: 0,
+        benefits: [
+          'Entrada libre a todas las proyecciones',
+          'Descuento del 20 % en talleres',
+          'Carné digital y boletín semanal',
+        ],
+      ),
+      MembershipPlan(
+        name: 'Socio General',
+        description: 'La cuota clásica de la asociación.',
+        price: 25,
+        order: 1,
+        highlight: true,
+        benefits: [
+          'Entrada libre a todas las proyecciones',
+          'Descuento del 10 % en talleres',
+          'Voz y voto en la asamblea',
+          'Carné digital y boletín semanal',
+        ],
+      ),
+      MembershipPlan(
+        name: 'Socio Familiar',
+        description: 'Dos personas adultas y menores a cargo.',
+        price: 40,
+        order: 2,
+        benefits: [
+          'Entrada libre para toda la familia',
+          'Descuento del 20 % en talleres',
+          'Voz y voto en la asamblea',
+          'Actividades familiares prioritarias',
+        ],
+      ),
+      MembershipPlan(
+        name: 'Socio Protector',
+        description: 'Para quienes quieren apoyar más al cine.',
+        price: 60,
+        order: 3,
+        benefits: [
+          'Todas las ventajas del Socio General',
+          'Invitación a preestrenos y encuentros',
+          'Agradecimiento en los créditos del ciclo',
+          'Asiento reservado en cada proyección',
+        ],
+      ),
+    ];
+    try {
+      final batch = _firestore.batch();
+      for (final plan in defaults) {
+        batch.set(_firestore.collection(Col.membershipPlans).doc(), {
+          ...plan.toJson(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      await batch.commit();
+    } on FirebaseException catch (e) {
+      throw _translate(e);
+    }
+  }
+
   /// Emite un certificado a un usuario (coordinador+ según reglas).
   Future<void> issueCertificate({
     required String uid,

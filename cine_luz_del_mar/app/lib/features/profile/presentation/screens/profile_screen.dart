@@ -11,6 +11,7 @@ import '../../../../shared/widgets/confirm_dialog.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../members/presentation/providers/members_providers.dart';
 import 'certificates_screen.dart';
 import 'favorites_screen.dart';
 
@@ -123,6 +124,14 @@ class _ProfileBody extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: () => context.push('/carne'),
         ),
+        if (ref.watch(myMemberProvider).value == null)
+          ListTile(
+            leading: const Icon(Icons.card_membership_outlined),
+            title: const Text('Hazte socio'),
+            subtitle: const Text('Elige tu pack y paga la cuota online'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/socio'),
+          ),
         ListTile(
           leading: const Icon(Icons.notifications_outlined),
           title: const Text('Notificaciones'),

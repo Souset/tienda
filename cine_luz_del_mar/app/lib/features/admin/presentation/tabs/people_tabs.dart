@@ -265,6 +265,12 @@ class _FeesSheet extends ConsumerWidget {
     final fees = ref.watch(memberFeesProvider(member.id));
     final repo = ref.read(adminRepositoryProvider);
     final year = DateTime.now().year.toString();
+    // Importe sugerido para nuevas cuotas: el precio del pack del socio.
+    final plans = ref.watch(allPlansProvider).value ?? const [];
+    var suggestedAmount = 20.0;
+    for (final plan in plans) {
+      if (plan.id == member.planId) suggestedAmount = plan.price;
+    }
 
     return SafeArea(
       child: Padding(
@@ -296,6 +302,8 @@ class _FeesSheet extends ConsumerWidget {
                         '${fee.id} · ${Formatters.currency.format(fee.amount)}',
                       ),
                       subtitle: Text(switch (fee.status) {
+                        'paid' when fee.method == 'stripe' =>
+                          'Pagada online (Stripe)',
                         'paid' => 'Pagada',
                         'exempt' => 'Exento',
                         _ => 'Pendiente',
@@ -324,10 +332,12 @@ class _FeesSheet extends ConsumerWidget {
                         () => repo.setFee(
                           uid: member.id,
                           year: year,
-                          amount: 20,
+                          amount: suggestedAmount,
                           status: 'pending',
                         ),
-                        successMessage: 'Cuota de $year creada',
+                        successMessage:
+                            'Cuota de $year creada '
+                            '(${Formatters.currency.format(suggestedAmount)})',
                       ),
                       icon: const Icon(Icons.add),
                       label: Text('Crear cuota de $year'),

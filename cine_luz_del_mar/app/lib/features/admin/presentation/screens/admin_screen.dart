@@ -5,6 +5,7 @@ import '../../../../shared/widgets/empty_state.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../tabs/content_tabs.dart';
 import '../tabs/people_tabs.dart';
+import '../tabs/plans_tab.dart';
 import '../tabs/push_tab.dart';
 import '../tabs/resumen_tab.dart';
 
@@ -35,6 +36,8 @@ class AdminScreen extends ConsumerWidget {
       (const Tab(text: 'Biblioteca'), const LibraryTab()),
       if (role.canManageMembers)
         (const Tab(text: 'Socios'), const MembersTab()),
+      if (role.canManageMembers)
+        (const Tab(text: 'Packs'), const PlansTab()),
       if (role.canManageUsers) (const Tab(text: 'Usuarios'), const UsersTab()),
       (const Tab(text: 'Push'), const PushTab()),
     ];

@@ -2,7 +2,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../shared/models/attendance_record.dart';
 import '../../../../shared/models/member.dart';
+import '../../../../shared/models/membership_plan.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../data/membership_service.dart';
 import '../../data/repositories/members_repository_impl.dart';
 import '../../domain/repositories/members_repository.dart';
 
@@ -63,4 +65,42 @@ class CheckInController extends Notifier<AsyncValue<void>> {
 final checkInControllerProvider =
     NotifierProvider<CheckInController, AsyncValue<void>>(
       CheckInController.new,
+    );
+
+/// Servicio de packs de socio y pago de cuotas.
+final membershipServiceProvider = Provider<MembershipService>(
+  (ref) => MembershipService(),
+);
+
+/// Packs de socio activos, en el orden configurado por la junta.
+final activePlansProvider = StreamProvider<List<MembershipPlan>>(
+  (ref) => ref.watch(membershipServiceProvider).watchActivePlans(),
+);
+
+/// Estado del proceso "pagar cuota": pide la sesión de Stripe al servidor.
+///
+/// La pantalla lanza la URL devuelta; los errores traducidos quedan en el
+/// [AsyncValue] para mostrarse en un snackbar.
+class CheckoutController extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<Uri?> createCheckout(String planId) async {
+    state = const AsyncLoading();
+    try {
+      final uri = await ref
+          .read(membershipServiceProvider)
+          .createCheckout(planId);
+      state = const AsyncData(null);
+      return uri;
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+      return null;
+    }
+  }
+}
+
+final checkoutControllerProvider =
+    NotifierProvider<CheckoutController, AsyncValue<void>>(
+      CheckoutController.new,
     );

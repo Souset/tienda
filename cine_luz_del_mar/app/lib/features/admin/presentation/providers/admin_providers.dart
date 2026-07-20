@@ -43,3 +43,8 @@ final adminUserProvider = FutureProvider.family<AppUser?, String>(
 final memberFeesProvider = StreamProvider.family<List<MemberFee>, String>(
   (ref, uid) => ref.watch(adminRepositoryProvider).watchFees(uid),
 );
+
+/// Todos los packs de socio, incluidos los inactivos (solo junta+).
+final allPlansProvider = StreamProvider<List<MembershipPlan>>(
+  (ref) => ref.watch(adminRepositoryProvider).watchAllPlans(),
+);

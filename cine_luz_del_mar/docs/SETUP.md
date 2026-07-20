@@ -172,14 +172,29 @@ Apple") requieren Apple Developer Program (99 $/año). Cuando la tengáis:
 activa el flag `APPLE_SIGNIN_ENABLED=true` al compilar y añade la
 capability en Xcode.
 
-## 9. Stripe (futuro, cuando haya suscripciones)
+## 9. Stripe (cuotas de socio con pago online)
 
-1. Crea la cuenta en stripe.com (sin coste fijo).
-2. En `config.php` de Nicalia: `stripe_enabled => true` y el
-   `stripe_webhook_secret` del panel de Stripe.
-3. Configura el webhook de Stripe apuntando a
-   `https://TU_DOMINIO/cine-api/api/stripe_webhook.php`.
-4. Completa los `case` marcados en ese archivo (cobro de cuotas).
+El sistema está completo: packs configurables en el panel de admin
+(pestaña "Packs"), pantalla "Hazte socio" en la app, cobro con Stripe
+Checkout (`api/crear_pago.php`) y confirmación por webhook
+(`api/stripe_webhook.php`, que da de alta al socio, marca la cuota
+pagada y le asigna el rol `socio`). Solo hay que conectar la cuenta:
+
+1. Crea la cuenta en <https://dashboard.stripe.com/register> (gratis,
+   sin cuota fija; Stripe cobra ~1,5 % + 0,25 € por pago europeo).
+2. En el dashboard: Desarrolladores → Claves de API → copia la clave
+   secreta (`sk_live_…`) en `stripe_secret_key` de `config.php`.
+3. Desarrolladores → Webhooks → Añadir destino:
+   URL `https://TU_DOMINIO/cine-api/api/stripe_webhook.php`, evento
+   `checkout.session.completed`; copia el signing secret (`whsec_…`)
+   en `stripe_webhook_secret`.
+4. Pon `stripe_enabled => true` y comprueba que `app_base_url` apunta
+   a tu dominio (las URLs de vuelta del pago se montan con él).
+5. En el panel de admin → pestaña Packs → "Crear packs de ejemplo" y
+   ajusta precios y ventajas a tu gusto.
+
+Para probar sin dinero real usa primero las claves de test
+(`sk_test_…`) y la tarjeta `4242 4242 4242 4242`.
 
 ## 10. Desarrollo local (emuladores, sin tocar producción)
 
