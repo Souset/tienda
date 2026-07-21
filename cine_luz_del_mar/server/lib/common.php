@@ -198,7 +198,9 @@ function service_account(): array
 /** Access token OAuth2 firmado con la service account (cacheado ~50 min). */
 function google_access_token(): string
 {
-    $cacheFile = sys_get_temp_dir() . '/clm_access_token.json';
+    // v2: el nombre de la caché cambió al ampliar el scope a cloud-platform
+    // (necesario para crear índices); así no se reutiliza un token antiguo.
+    $cacheFile = sys_get_temp_dir() . '/clm_access_token_v2.json';
     if (is_file($cacheFile)) {
         $cached = json_decode((string) file_get_contents($cacheFile), true);
         if (($cached['exp'] ?? 0) > time() + 60) {
@@ -211,7 +213,9 @@ function google_access_token(): string
     $header = b64url_encode((string) json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
     $payload = b64url_encode((string) json_encode([
         'iss' => $sa['client_email'],
-        'scope' => 'https://www.googleapis.com/auth/datastore '
+        // cloud-platform cubre Firestore (datos y administración, incluida
+        // la creación de índices); messaging es para las push FCM.
+        'scope' => 'https://www.googleapis.com/auth/cloud-platform '
             . 'https://www.googleapis.com/auth/firebase.messaging',
         'aud' => 'https://oauth2.googleapis.com/token',
         'iat' => $now,
