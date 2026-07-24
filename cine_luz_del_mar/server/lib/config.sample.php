@@ -54,6 +54,11 @@ return [
     // URL pública de la app (para las redirecciones de vuelta tras el pago).
     'app_base_url' => 'https://TU_DOMINIO',
 
+    // Correos premium desde el propio dominio (verificación, recuperación,
+    // bienvenida de socio). Crea la cuenta en cPanel → Cuentas de correo.
+    'mail_from' => 'no-responder@TU_DOMINIO',
+    'mail_from_name' => 'Cine Luz del Mar',
+
     // Pagos con Stripe (cuotas de socio).
     //   1. Crea tu cuenta gratuita en https://dashboard.stripe.com/register
     //   2. Copia la clave secreta (sk_live_... o sk_test_...) en

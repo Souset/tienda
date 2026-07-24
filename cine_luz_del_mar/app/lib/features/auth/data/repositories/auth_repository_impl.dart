@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -21,6 +22,42 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final Dio _dio = Dio();
+
+  /// Pide al servidor de la asociación el envío de un correo premium
+  /// (plantilla propia, desde el dominio). Devuelve false si no se pudo,
+  /// para que el llamante recurra al envío estándar de Firebase.
+  Future<bool> _sendBrandedEmail({
+    required String tipo,
+    String? email,
+  }) async {
+    try {
+      final headers = <String, String>{};
+      if (tipo == 'verificacion') {
+        final idToken = await _auth.currentUser?.getIdToken();
+        if (idToken == null) return false;
+        headers['Authorization'] = 'Bearer $idToken';
+      }
+      await _dio.post<Map<String, dynamic>>(
+        '${AppConfig.apiBaseUrl}/enviar_correo.php',
+        data: {'tipo': tipo, 'email': ?email},
+        options: Options(
+          headers: headers,
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+      return true;
+    } on DioException catch (error) {
+      // 409 = ya verificado: no hay nada que reenviar (no es un fallo).
+      if (error.response?.statusCode == 409) return true;
+      debugPrint('Correo premium no disponible: ${error.message}');
+      return false;
+    } catch (error) {
+      debugPrint('Correo premium no disponible: $error');
+      return false;
+    }
+  }
 
   // google_sign_in v7 exige inicializar la instancia una única vez.
   bool _googleInitialized = false;
@@ -145,8 +182,11 @@ class AuthRepositoryImpl implements AuthRepository {
       await _ensureUserDoc(user);
       // El envío del correo de verificación no debe frustrar el registro:
       // la pantalla de verificación permite reenviarlo en cualquier momento.
+      // Primero el correo premium del dominio propio; Firebase de respaldo.
       try {
-        await user.sendEmailVerification();
+        if (!await _sendBrandedEmail(tipo: 'verificacion')) {
+          await user.sendEmailVerification();
+        }
       } catch (error) {
         debugPrint('Verificación no enviada (se podrá reenviar): $error');
       }
@@ -214,6 +254,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> sendPasswordReset(String email) async {
+    if (await _sendBrandedEmail(tipo: 'recuperar', email: email.trim())) {
+      return;
+    }
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
     } on FirebaseAuthException catch (error) {
@@ -223,6 +266,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> sendEmailVerification() async {
+    if (await _sendBrandedEmail(tipo: 'verificacion')) return;
     try {
       await _auth.currentUser?.sendEmailVerification();
     } on FirebaseAuthException catch (error) {

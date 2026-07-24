@@ -21,6 +21,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../lib/common.php';
+require __DIR__ . '/../lib/email.php';
 
 if (!config()['stripe_enabled']) {
     json_error(503, 'Los pagos no están activados');
@@ -181,7 +182,7 @@ firestore_patch('stripe_payments/' . rawurlencode($sessionId), [
     'createdAt' => ['timestampValue' => $now],
 ]);
 
-// 5) Aviso al socio: buzón in-app + push a sus dispositivos.
+// 5) Aviso al socio: buzón in-app + push + correo de bienvenida premium.
 $title = '¡Bienvenido/a, socio/a!';
 $body = 'Pago recibido: ' . $planName . ' ('
     . number_format($amount, 2, ',', '.') . ' €). Tu carné ya está listo.';
@@ -190,6 +191,27 @@ if ($user !== null) {
     foreach ((array) (fs_field($user, 'fcmTokens') ?? []) as $token) {
         fcm_send((string) $token, $title, $body, ['route' => '/carne']);
     }
+}
+$email = (string) ($session['customer_details']['email']
+    ?? $session['customer_email']
+    ?? ($user !== null ? fs_field($user, 'email') : '')
+    ?? '');
+if ($email !== '') {
+    $importe = number_format($amount, 2, ',', '.');
+    send_branded_email(
+        $email,
+        'Bienvenido/a a Cine Luz del Mar 🎬',
+        '¡Ya eres socio/a!',
+        "Hemos recibido tu pago de <strong style=\"color:#ffffff\">$importe €</strong> "
+            . '(' . htmlspecialchars($planName, ENT_QUOTES, 'UTF-8') . '). '
+            . 'Tu carné digital ya está activo: enséñalo desde la app en '
+            . 'cualquier actividad. Gracias por apoyar el cine.',
+        "Pago recibido: $planName ($importe €). Tu carné digital ya está "
+            . 'activo en la app.',
+        'Ver mi carné',
+        rtrim((string) (config()['app_base_url'] ?? 'https://cineluzdelmar.com'), '/')
+            . '/#/carne'
+    );
 }
 
 json_response(200, ['received' => true, 'uid' => $uid, 'fee' => $feeId]);
