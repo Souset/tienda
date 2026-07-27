@@ -1,0 +1,677 @@
+# Instincts generated from https://github.com/Souset/tienda
+# Generated: 2026-07-27T06:02:14.520Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: tienda-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Commit Length
+
+## Action
+
+Write moderate-length commit messages (~78 characters)
+
+## Evidence
+
+- Average commit message length: 78 chars
+- Based on 25 commits
+
+---
+id: tienda-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: tienda-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: tienda-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: tienda-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: tienda-workflow-add-new-feature-module
+trigger: "when doing add new feature module"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add New Feature Module
+
+## Action
+
+Follow the add-new-feature-module workflow:
+1. Create data/repositories/feature_repository_impl.dart
+2. Create domain/repositories/feature_repository.dart
+3. Create presentation/providers/feature_providers.dart
+4. Create presentation/screens/feature_screen.dart (and detail screens if needed)
+5. Create presentation/widgets/ as needed
+6. Wire up routes in core/router/app_router.dart
+7. Add tests in test/features/feature/feature_screen_test.dart
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/app/lib/features/*/data/repositories/*.dart, cine_luz_del_mar/app/lib/features/*/domain/repositories/*.dart, cine_luz_del_mar/app/lib/features/*/presentation/providers/*.dart
+
+---
+id: tienda-workflow-add-or-update-firestore-rules-and-indexes
+trigger: "when doing add or update firestore rules and indexes"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add Or Update Firestore Rules And Indexes
+
+## Action
+
+Follow the add-or-update-firestore-rules-and-indexes workflow:
+1. Edit firebase/firestore.rules
+2. Edit firebase/firestore.indexes.json
+3. Edit or add firebase/rules-tests/*.mjs for rule testing
+4. Update or add scripts/server for deploying indexes (e.g. instalar_indices.php)
+5. Run rule tests to verify
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/firebase/firestore.rules, cine_luz_del_mar/firebase/firestore.indexes.json, cine_luz_del_mar/firebase/rules-tests/*.mjs
+
+---
+id: tienda-workflow-add-or-update-shared-models
+trigger: "when doing add or update shared models"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add Or Update Shared Models
+
+## Action
+
+Follow the add-or-update-shared-models workflow:
+1. Create or update lib/shared/models/model.dart
+2. Generate model.freezed.dart and model.g.dart
+3. Update lib/shared/models/models.dart barrel
+4. Add or update tests for model serialization/deserialization
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/app/lib/shared/models/*.dart, cine_luz_del_mar/app/lib/shared/models/*.freezed.dart, cine_luz_del_mar/app/lib/shared/models/*.g.dart
+
+---
+id: tienda-workflow-brand-asset-update
+trigger: "when doing brand asset update"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Brand Asset Update
+
+## Action
+
+Follow the brand-asset-update workflow:
+1. Edit or add assets_brand/*.svg and *.png
+2. Update app/assets/brand/* as needed
+3. Update shared/widgets/brand_wordmark.dart or theme/app_theme.dart if rendering changes
+4. Verify visually and run tests
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/assets_brand/*.svg, cine_luz_del_mar/assets_brand/*.png, cine_luz_del_mar/app/assets/brand/*.png
+
+---
+id: tienda-workflow-add-or-update-admin-or-panel-functionality
+trigger: "when doing add or update admin or panel functionality"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add Or Update Admin Or Panel Functionality
+
+## Action
+
+Follow the add-or-update-admin-or-panel-functionality workflow:
+1. Edit or add features/admin/data/admin_repository.dart
+2. Edit or add features/admin/presentation/screens/admin_screen.dart
+3. Edit or add features/admin/presentation/tabs/*.dart
+4. Edit or add features/admin/presentation/providers/admin_providers.dart
+5. Edit or add features/admin/domain/*.dart
+6. Wire up new admin routes or tabs
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/app/lib/features/admin/data/admin_repository.dart, cine_luz_del_mar/app/lib/features/admin/presentation/screens/admin_screen.dart, cine_luz_del_mar/app/lib/features/admin/presentation/tabs/*.dart
+
+---
+id: tienda-workflow-add-or-update-server-api-or-cron
+trigger: "when doing add or update server api or cron"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add Or Update Server Api Or Cron
+
+## Action
+
+Follow the add-or-update-server-api-or-cron workflow:
+1. Create or edit server/api/*.php for new endpoints
+2. Create or edit server/cron/*.php for scheduled tasks
+3. Edit server/lib/common.php or config.sample.php for shared logic/config
+4. Update .htaccess or security as needed
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/server/api/*.php, cine_luz_del_mar/server/cron/*.php, cine_luz_del_mar/server/lib/common.php
+
+---
+id: tienda-workflow-add-or-update-auth-flow
+trigger: "when doing add or update auth flow"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Souset/tienda
+---
+
+# Tienda Workflow Add Or Update Auth Flow
+
+## Action
+
+Follow the add-or-update-auth-flow workflow:
+1. Edit features/auth/data/repositories/auth_repository_impl.dart
+2. Edit features/auth/domain/repositories/auth_repository.dart
+3. Edit features/auth/presentation/screens/*.dart
+4. Edit features/auth/presentation/providers/auth_providers.dart
+5. Edit profile screens for verification state
+6. Edit or add server/api/enviar_correo.php or related email logic
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: cine_luz_del_mar/app/lib/features/auth/data/repositories/auth_repository_impl.dart, cine_luz_del_mar/app/lib/features/auth/domain/repositories/auth_repository.dart, cine_luz_del_mar/app/lib/features/auth/presentation/screens/*.dart
+
+---
+id: tienda-instinct-file-naming
+trigger: "When creating a new file in the codebase."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct File Naming
+
+## Action
+
+Name files using snake_case.
+
+## Evidence
+
+- Pattern in cine_luz_del_mar/app/lib/**/*.dart
+- Naming conventions: files = snake_case
+
+---
+id: tienda-instinct-function-naming
+trigger: "When defining a new function."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Function Naming
+
+## Action
+
+Name functions using camelCase.
+
+## Evidence
+
+- Naming conventions: functions = camelCase
+
+---
+id: tienda-instinct-class-naming
+trigger: "When defining a new class."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Class Naming
+
+## Action
+
+Name classes using PascalCase.
+
+## Evidence
+
+- Naming conventions: classes = PascalCase
+
+---
+id: tienda-instinct-constant-naming
+trigger: "When defining a constant."
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Constant Naming
+
+## Action
+
+Name constants using SCREAMING_SNAKE_CASE.
+
+## Evidence
+
+- Naming conventions: constants = SCREAMING_SNAKE_CASE
+
+---
+id: tienda-instinct-import-style
+trigger: "When importing modules."
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Import Style
+
+## Action
+
+Use relative imports.
+
+## Evidence
+
+- importStyle: relative
+
+---
+id: tienda-instinct-export-style
+trigger: "When exporting modules."
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Export Style
+
+## Action
+
+Use named exports.
+
+## Evidence
+
+- exportStyle: named
+
+---
+id: tienda-instinct-test-file-pattern
+trigger: "When creating a test file."
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Test File Pattern
+
+## Action
+
+Name test files with the pattern *.test.ts.
+
+## Evidence
+
+- testing.filePattern: *.test.ts
+
+---
+id: tienda-instinct-test-type-unit
+trigger: "When writing tests."
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Test Type Unit
+
+## Action
+
+Write unit tests.
+
+## Evidence
+
+- testing.testTypes: unit
+
+---
+id: tienda-instinct-test-location-mixed
+trigger: "When adding tests."
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Test Location Mixed
+
+## Action
+
+Place test files alongside source files or in dedicated test directories.
+
+## Evidence
+
+- architecture.folderStructure.testLocation: mixed
+
+---
+id: tienda-instinct-commit-prefix-ci
+trigger: "When committing CI-related changes."
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Commit Prefix Ci
+
+## Action
+
+Prefix commit messages with 'CI:'.
+
+## Evidence
+
+- Seen in commit: 'CI: workflow de despliegue web a Firebase Hosting (manual o al fusionar en master)'
+
+---
+id: tienda-instinct-commit-prefix-logo
+trigger: "When committing logo or brand asset changes."
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Commit Prefix Logo
+
+## Action
+
+Prefix commit messages with 'Logo:'.
+
+## Evidence
+
+- Seen in commit: 'Logo: calco vectorial suavizado del original (curvas limpias, formas fieles)'
+
+---
+id: tienda-instinct-commit-prefix-fase
+trigger: "When committing a phase or milestone change."
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Commit Prefix Fase
+
+## Action
+
+Prefix commit messages with 'Fase X:'.
+
+## Evidence
+
+- Seen in commit: 'Fase 2: reglas de seguridad de Firestore, índices y tests contra el emulador'
+
+---
+id: tienda-instinct-commit-average-length
+trigger: "When writing a commit message."
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Commit Average Length
+
+## Action
+
+Write commit messages averaging around 78 characters.
+
+## Evidence
+
+- commits.averageLength: 78
+
+---
+id: tienda-instinct-add-new-feature-module
+trigger: "When someone wants to implement a new feature or section in the app."
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add New Feature Module
+
+## Action
+
+Create data, domain, and presentation layers, providers, screens, widgets, wire up routes, and add tests for the new feature module.
+
+## Evidence
+
+- Workflow: add-new-feature-module
+- commit sequence and files involved
+
+---
+id: tienda-instinct-add-or-update-firestore-rules-and-indexes
+trigger: "When someone wants to enforce new security policies or support new queries in Firestore."
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add Or Update Firestore Rules And Indexes
+
+## Action
+
+Edit firestore.rules, firestore.indexes.json, add or update rule tests, and deployment scripts as needed.
+
+## Evidence
+
+- Workflow: add-or-update-firestore-rules-and-indexes
+- commit sequence and files involved
+
+---
+id: tienda-instinct-add-or-update-shared-models
+trigger: "When someone wants to define or change a Firestore collection's data structure."
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add Or Update Shared Models
+
+## Action
+
+Create or update shared model Dart files, generate Freezed and .g.dart files, update the models.dart barrel, and add serialization tests.
+
+## Evidence
+
+- Workflow: add-or-update-shared-models
+- commit sequence and files involved
+
+---
+id: tienda-instinct-brand-asset-update
+trigger: "When someone wants to update the branding or visual identity assets."
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Brand Asset Update
+
+## Action
+
+Edit or add SVG/PNG brand assets, update their usage in the app, and verify visually.
+
+## Evidence
+
+- Workflow: brand-asset-update
+- commit sequence and files involved
+
+---
+id: tienda-instinct-add-or-update-admin-or-panel-functionality
+trigger: "When someone wants to extend or improve admin capabilities."
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add Or Update Admin Or Panel Functionality
+
+## Action
+
+Edit or add admin repository, screens, tabs, providers, domain logic, and wire up new routes or tabs.
+
+## Evidence
+
+- Workflow: add-or-update-admin-or-panel-functionality
+- commit sequence and files involved
+
+---
+id: tienda-instinct-add-or-update-server-api-or-cron
+trigger: "When someone wants to add server-side automation or integrations."
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add Or Update Server Api Or Cron
+
+## Action
+
+Create or edit PHP API endpoints, cron jobs, shared logic/config, and update .htaccess as needed.
+
+## Evidence
+
+- Workflow: add-or-update-server-api-or-cron
+- commit sequence and files involved
+
+---
+id: tienda-instinct-add-or-update-auth-flow
+trigger: "When someone wants to add or fix authentication features."
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: Souset/tienda
+---
+
+# Tienda Instinct Add Or Update Auth Flow
+
+## Action
+
+Edit authentication repositories, screens, providers, profile screens, and related server email logic.
+
+## Evidence
+
+- Workflow: add-or-update-auth-flow
+- commit sequence and files involved
+
