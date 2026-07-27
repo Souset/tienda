@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/collections.dart';
 import '../../../../shared/models/models.dart';
 import '../../domain/repositories/news_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [NewsRepository] con Cloud Firestore.
 ///
@@ -21,7 +22,7 @@ class NewsRepositoryImpl implements NewsRepository {
         .where('status', isEqualTo: 'published')
         .orderBy('publishedAt', descending: true)
         .limit(limit)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map((doc) => NewsItem.fromJson(doc.data()).copyWith(id: doc.id))
@@ -31,7 +32,9 @@ class NewsRepositoryImpl implements NewsRepository {
 
   @override
   Stream<NewsItem?> watchItem(String id) {
-    return _firestore.collection(Col.news).doc(id).snapshots().map((snap) {
+    return _firestore.collection(Col.news).doc(id).serverSnapshots().map((
+      snap,
+    ) {
       final data = snap.data();
       if (!snap.exists || data == null) return null;
       return NewsItem.fromJson(data).copyWith(id: snap.id);

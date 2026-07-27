@@ -20,6 +20,12 @@ const double _minCardWidth = 300;
 const double _maxContentWidth = 1240;
 const double _gap = 16;
 
+/// Columnas que caben con un ancho cómodo (1 en móvil, hasta 4 en ancho).
+int _columnsFor(double maxWidth) {
+  final width = maxWidth.clamp(0.0, _maxContentWidth);
+  return ((width - 32 + _gap) / (_minCardWidth + _gap)).floor().clamp(1, 4);
+}
+
 /// Pantalla "Hazte socio" (ruta `/socio`): packs de socio configurados por
 /// la junta, con pago online mediante Stripe Checkout.
 class BecomeMemberScreen extends ConsumerWidget {
@@ -60,7 +66,7 @@ class BecomeMemberScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Hazte socio')),
       body: plansAsync.when(
-        loading: () => const ShimmerList(itemHeight: 220),
+        loading: () => const _PlansShimmerGrid(),
         error: (error, _) => ErrorView(
           error: error,
           onRetry: () => ref.invalidate(activePlansProvider),
@@ -79,10 +85,7 @@ class BecomeMemberScreen extends ConsumerWidget {
             builder: (context, constraints) {
               // Rejilla responsive: tantas tarjetas por fila como quepan
               // con un ancho cómodo, centradas y sin estirarse de más.
-              final width = constraints.maxWidth.clamp(0.0, _maxContentWidth);
-              final columns = ((width - 32 + _gap) / (_minCardWidth + _gap))
-                  .floor()
-                  .clamp(1, 4);
+              final columns = _columnsFor(constraints.maxWidth);
               final rows = <List<(int, MembershipPlan)>>[];
               for (var i = 0; i < plans.length; i += columns) {
                 rows.add([
@@ -93,9 +96,7 @@ class BecomeMemberScreen extends ConsumerWidget {
 
               return Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: _maxContentWidth,
-                  ),
+                  constraints: const BoxConstraints(maxWidth: _maxContentWidth),
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                     children: [
@@ -177,6 +178,55 @@ class BecomeMemberScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Estado de carga con la MISMA rejilla que las tarjetas reales, para que
+/// no haya salto de maquetación al llegar los datos.
+class _PlansShimmerGrid extends StatelessWidget {
+  const _PlansShimmerGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = _columnsFor(constraints.maxWidth);
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(4, 8, 4, 16),
+                  // Align: sin él, el ListView estiraría la línea al ancho
+                  // completo aunque tenga width fijo.
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppShimmer(height: 20, width: 340),
+                  ),
+                ),
+                for (var fila = 0; fila < (columns == 1 ? 3 : 2); fila++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: _gap),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < columns; i++) ...[
+                          if (i > 0) const SizedBox(width: _gap),
+                          const Expanded(
+                            child: AppShimmer(height: 290, radius: 18),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -285,10 +335,7 @@ class _PlanCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        benefit,
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                      child: Text(benefit, style: theme.textTheme.bodyMedium),
                     ),
                   ],
                 ),
@@ -394,13 +441,14 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.check_circle_rounded, size: 72)
-                        .animate()
-                        .scale(
-                          begin: const Offset(0.6, 0.6),
-                          curve: Curves.easeOutBack,
-                          duration: 400.ms,
-                        ),
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 72,
+                    ).animate().scale(
+                      begin: const Offset(0.6, 0.6),
+                      curve: Curves.easeOutBack,
+                      duration: 400.ms,
+                    ),
                     const SizedBox(height: 20),
                     Text(
                       '¡Bienvenido/a, socio/a!',

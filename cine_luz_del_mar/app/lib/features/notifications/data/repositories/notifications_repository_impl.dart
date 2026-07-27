@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/collections.dart';
 import '../../../../shared/models/models.dart';
 import '../../domain/repositories/notifications_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [NotificationsRepository] con Cloud Firestore.
 ///
@@ -23,7 +24,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     return _items(uid)
         .orderBy('createdAt', descending: true)
         .limit(50)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map(
@@ -63,7 +64,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     return _items(uid)
         .where('read', isEqualTo: false)
         .limit(99)
-        .snapshots()
+        .serverSnapshots()
         .map((snap) => snap.docs.length);
   }
 }

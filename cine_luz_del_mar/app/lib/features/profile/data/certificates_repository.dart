@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../core/services/collections.dart';
 import '../../../shared/models/models.dart';
 import '../../auth/presentation/providers/auth_providers.dart';
+import '../../../core/utils/firestore_streams.dart';
 
 /// Certificados emitidos al usuario (colección certificates, uid == mío).
 class CertificatesRepository {
@@ -15,7 +16,7 @@ class CertificatesRepository {
   Stream<List<Certificate>> watchMine(String uid) => _firestore
       .collection(Col.certificates)
       .where('uid', isEqualTo: uid)
-      .snapshots()
+      .serverSnapshots()
       .map(
         (snap) =>
             [

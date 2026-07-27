@@ -252,9 +252,7 @@ class _PlanEditSheetState extends ConsumerState<_PlanEditSheet> {
             TextFormField(
               controller: _description,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Descripción breve',
-              ),
+              decoration: const InputDecoration(labelText: 'Descripción breve'),
             ),
             const SizedBox(height: 12),
             Row(
@@ -307,8 +305,7 @@ class _PlanEditSheetState extends ConsumerState<_PlanEditSheet> {
               decoration: const InputDecoration(
                 labelText: 'Ventajas (una por línea)',
                 alignLabelWithHint: true,
-                hintText:
-                    'Entrada libre a proyecciones\nDescuento en talleres',
+                hintText: 'Entrada libre a proyecciones\nDescuento en talleres',
               ),
             ),
             const SizedBox(height: 12),

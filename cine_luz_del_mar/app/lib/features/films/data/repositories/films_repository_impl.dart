@@ -6,6 +6,7 @@ import '../../../../shared/models/app_user.dart';
 import '../../../../shared/models/film.dart';
 import '../../domain/rating_math.dart';
 import '../../domain/repositories/films_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [FilmsRepository] con Cloud Firestore.
 ///
@@ -26,7 +27,7 @@ class FilmsRepositoryImpl implements FilmsRepository {
     return _films
         .orderBy('title')
         .limit(100)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map((d) => Film.fromJson(d.data()).copyWith(id: d.id))
@@ -36,7 +37,7 @@ class FilmsRepositoryImpl implements FilmsRepository {
 
   @override
   Stream<Film?> watchFilm(String id) {
-    return _films.doc(id).snapshots().map((doc) {
+    return _films.doc(id).serverSnapshots().map((doc) {
       final data = doc.data();
       if (!doc.exists || data == null) return null;
       return Film.fromJson(data).copyWith(id: doc.id);
@@ -50,7 +51,7 @@ class FilmsRepositoryImpl implements FilmsRepository {
         .collection('ratings')
         .orderBy('createdAt', descending: true)
         .limit(limit)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map((d) => FilmRating.fromJson(d.data()).copyWith(id: d.id))
@@ -60,7 +61,9 @@ class FilmsRepositoryImpl implements FilmsRepository {
 
   @override
   Stream<FilmRating?> watchMyRating(String id, String uid) {
-    return _films.doc(id).collection('ratings').doc(uid).snapshots().map((doc) {
+    return _films.doc(id).collection('ratings').doc(uid).serverSnapshots().map((
+      doc,
+    ) {
       final data = doc.data();
       if (!doc.exists || data == null) return null;
       return FilmRating.fromJson(data).copyWith(id: doc.id);

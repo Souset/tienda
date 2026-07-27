@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../providers/news_providers.dart';
@@ -40,22 +41,24 @@ class NewsListScreen extends ConsumerWidget {
           final featured = items.first;
           final rest = items.skip(1).toList();
 
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 24),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: _FeaturedNewsCard(
-                  item: featured,
-                  onTap: () => context.push('/noticias/${featured.id}'),
+          return ContentColumn(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: _FeaturedNewsCard(
+                    item: featured,
+                    onTap: () => context.push('/noticias/${featured.id}'),
+                  ),
                 ),
-              ),
-              for (final item in rest)
-                _NewsRow(
-                  item: item,
-                  onTap: () => context.push('/noticias/${item.id}'),
-                ),
-            ],
+                for (final item in rest)
+                  _NewsRow(
+                    item: item,
+                    onTap: () => context.push('/noticias/${item.id}'),
+                  ),
+              ],
+            ),
           );
         },
       ),
@@ -201,36 +204,38 @@ class _NewsListShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        AppShimmer(height: 200, radius: AppTheme.radiusL),
-        const SizedBox(height: 12),
-        const AppShimmer(height: 24, width: 240),
-        const SizedBox(height: 8),
-        const AppShimmer(height: 16, width: 140),
-        const SizedBox(height: 24),
-        for (var i = 0; i < 5; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                AppShimmer(width: 84, height: 84, radius: AppTheme.radiusS),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      AppShimmer(height: 16),
-                      SizedBox(height: 8),
-                      AppShimmer(height: 12, width: 100),
-                    ],
+    return ContentColumn(
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          AppShimmer(height: 200, radius: AppTheme.radiusL),
+          const SizedBox(height: 12),
+          const AppShimmer(height: 24, width: 240),
+          const SizedBox(height: 8),
+          const AppShimmer(height: 16, width: 140),
+          const SizedBox(height: 24),
+          for (var i = 0; i < 5; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  AppShimmer(width: 84, height: 84, radius: AppTheme.radiusS),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        AppShimmer(height: 16),
+                        SizedBox(height: 8),
+                        AppShimmer(height: 12, width: 100),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

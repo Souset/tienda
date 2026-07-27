@@ -6,6 +6,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/notifications_providers.dart';
@@ -37,7 +38,7 @@ class NotificationsScreen extends ConsumerWidget {
         ],
       ),
       body: inboxAsync.when(
-        loading: () => const ShimmerList(),
+        loading: () => const ShimmerList(maxWidth: ContentWidth.list),
         error: (error, _) => ErrorView(
           error: error,
           onRetry: () => ref.invalidate(inboxProvider),
@@ -58,31 +59,33 @@ class NotificationsScreen extends ConsumerWidget {
               title: 'Sin novedades por ahora',
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: items.length,
-            separatorBuilder: (_, _) =>
-                const Divider(height: 1, indent: 20, endIndent: 20),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _NotificationTile(
-                item: item,
-                onTap: () async {
-                  if (!item.read) {
-                    await ref
-                        .read(notificationsRepositoryProvider)
-                        .markRead(uid, item.id);
-                  }
-                  final route = item.route;
-                  if (route != null && route.isNotEmpty && context.mounted) {
-                    context.push(route);
-                  }
-                },
-                onDismissed: () => ref
-                    .read(notificationsRepositoryProvider)
-                    .delete(uid, item.id),
-              );
-            },
+          return ContentColumn(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: items.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, indent: 20, endIndent: 20),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return _NotificationTile(
+                  item: item,
+                  onTap: () async {
+                    if (!item.read) {
+                      await ref
+                          .read(notificationsRepositoryProvider)
+                          .markRead(uid, item.id);
+                    }
+                    final route = item.route;
+                    if (route != null && route.isNotEmpty && context.mounted) {
+                      context.push(route);
+                    }
+                  },
+                  onDismissed: () => ref
+                      .read(notificationsRepositoryProvider)
+                      .delete(uid, item.id),
+                );
+              },
+            ),
           );
         },
       ),

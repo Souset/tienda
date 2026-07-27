@@ -27,10 +27,7 @@ class AuthRepositoryImpl implements AuthRepository {
   /// Pide al servidor de la asociación el envío de un correo premium
   /// (plantilla propia, desde el dominio). Devuelve false si no se pudo,
   /// para que el llamante recurra al envío estándar de Firebase.
-  Future<bool> _sendBrandedEmail({
-    required String tipo,
-    String? email,
-  }) async {
+  Future<bool> _sendBrandedEmail({required String tipo, String? email}) async {
     try {
       final headers = <String, String>{};
       if (tipo == 'verificacion') {
@@ -68,14 +65,29 @@ class AuthRepositoryImpl implements AuthRepository {
     StreamSubscription<User?>? authSub;
     StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? docSub;
 
+    // Último perfil completo emitido: ante un fallo transitorio de red o
+    // una instantánea de caché vacía NUNCA se degrada la sesión a invitado
+    // (p. ej. un admin no debe "perder" su rol por un microcorte).
+    AppUser? lastGood;
+
     Future<void> onAuthChanged(User? user) async {
       await docSub?.cancel();
       docSub = null;
 
       if (user == null) {
+        lastGood = null;
         if (!controller.isClosed) controller.add(null);
         return;
       }
+
+      AppUser fallback() =>
+          lastGood ??
+          AppUser(
+            id: user.uid,
+            displayName: user.displayName ?? '',
+            email: user.email ?? '',
+            photoUrl: user.photoURL,
+          );
 
       // Garantiza que exista el documento de perfil antes de escucharlo.
       await _ensureUserDoc(user);
@@ -89,30 +101,19 @@ class AuthRepositoryImpl implements AuthRepository {
               if (controller.isClosed) return;
               final data = snap.data();
               if (snap.exists && data != null) {
-                controller.add(AppUser.fromJson(data).copyWith(id: user.uid));
-              } else {
-                controller.add(
-                  AppUser(
-                    id: user.uid,
-                    displayName: user.displayName ?? '',
-                    email: user.email ?? '',
-                    photoUrl: user.photoURL,
-                  ),
-                );
+                lastGood = AppUser.fromJson(data).copyWith(id: user.uid);
+                controller.add(lastGood);
+              } else if (!snap.metadata.isFromCache) {
+                // Solo el servidor puede afirmar que el perfil no existe;
+                // una caché vacía no debe pisar una sesión ya cargada.
+                controller.add(fallback());
+              } else if (lastGood != null) {
+                controller.add(lastGood);
               }
             },
             onError: (Object error) {
               debugPrint('watchSession snapshot error: $error');
-              if (!controller.isClosed) {
-                controller.add(
-                  AppUser(
-                    id: user.uid,
-                    displayName: user.displayName ?? '',
-                    email: user.email ?? '',
-                    photoUrl: user.photoURL,
-                  ),
-                );
-              }
+              if (!controller.isClosed) controller.add(fallback());
             },
           );
     }
@@ -159,8 +160,29 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email.trim(),
         password: password,
       );
+      // Mantiene el botón en "cargando" hasta que el perfil (con el rol)
+      // está disponible: sin esto el login parecía terminado pero la app
+      // tardaba unos segundos más en reflejar la sesión.
+      await _warmUpProfile();
     } on FirebaseAuthException catch (error) {
       throw _mapFirebaseError(error);
+    }
+  }
+
+  /// Precarga el documento de perfil tras iniciar sesión (mejor UX: la
+  /// pantalla de acceso mantiene su spinner hasta que la sesión es real).
+  /// Nunca lanza: si la red va lenta, la sesión terminará de cargar sola.
+  Future<void> _warmUpProfile() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await _firestore
+          .collection(Col.users)
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 8));
+    } catch (error) {
+      debugPrint('Precarga de perfil omitida: $error');
     }
   }
 
@@ -202,6 +224,7 @@ class AuthRepositoryImpl implements AuthRepository {
         // google_sign_in v7 en web no soporta authenticate(); se usa el flujo
         // de popup nativo de firebase_auth.
         await _auth.signInWithPopup(GoogleAuthProvider());
+        await _warmUpProfile();
         return;
       }
 
@@ -218,6 +241,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final credential = GoogleAuthProvider.credential(idToken: idToken);
       await _auth.signInWithCredential(credential);
+      await _warmUpProfile();
     } on GoogleSignInException catch (error) {
       if (error.code == GoogleSignInExceptionCode.canceled) {
         throw const AuthException('Inicio de sesión cancelado');

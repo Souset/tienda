@@ -197,7 +197,11 @@ abstract final class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: scheme.surfaceContainerLowest,
         indicatorColor: scheme.primaryContainer,
-        labelTextStyle: WidgetStatePropertyAll(text.labelMedium),
+        // Compacto y sin tracking: con 5 destinos en 390px de ancho,
+        // "Comunidad" debe caber en una línea (~60px útiles por pestaña).
+        labelTextStyle: WidgetStatePropertyAll(
+          text.labelSmall?.copyWith(fontSize: 10.5, letterSpacing: 0),
+        ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)

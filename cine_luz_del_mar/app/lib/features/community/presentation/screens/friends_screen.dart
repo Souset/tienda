@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/user_avatar.dart';
@@ -33,45 +34,49 @@ class FriendsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: friendships.when(
-          loading: () => const ShimmerList(),
-          error: (error, _) => ErrorView(
-            error: error,
-            onRetry: () => ref.invalidate(friendshipsProvider),
+        body: ContentColumn(
+          child: friendships.when(
+            loading: () => const ShimmerList(),
+            error: (error, _) => ErrorView(
+              error: error,
+              onRetry: () => ref.invalidate(friendshipsProvider),
+            ),
+            data: (all) {
+              final accepted = all
+                  .where((f) => f.status == 'accepted')
+                  .toList();
+              final pending = all.where((f) => f.status == 'pending').toList();
+              return TabBarView(
+                children: [
+                  accepted.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.group_outlined,
+                          title: 'Todavía no tienes amigos aquí',
+                          message:
+                              'Añade a otras personas desde sus '
+                              'publicaciones en la comunidad.',
+                        )
+                      : ListView(
+                          children: [
+                            for (final f in accepted)
+                              _FriendTile(friendship: f, myUid: user.id),
+                          ],
+                        ),
+                  pending.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.mark_email_unread_outlined,
+                          title: 'Sin solicitudes pendientes',
+                        )
+                      : ListView(
+                          children: [
+                            for (final f in pending)
+                              _FriendTile(friendship: f, myUid: user.id),
+                          ],
+                        ),
+                ],
+              );
+            },
           ),
-          data: (all) {
-            final accepted = all.where((f) => f.status == 'accepted').toList();
-            final pending = all.where((f) => f.status == 'pending').toList();
-            return TabBarView(
-              children: [
-                accepted.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.group_outlined,
-                        title: 'Todavía no tienes amigos aquí',
-                        message:
-                            'Añade a otras personas desde sus '
-                            'publicaciones en la comunidad.',
-                      )
-                    : ListView(
-                        children: [
-                          for (final f in accepted)
-                            _FriendTile(friendship: f, myUid: user.id),
-                        ],
-                      ),
-                pending.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.mark_email_unread_outlined,
-                        title: 'Sin solicitudes pendientes',
-                      )
-                    : ListView(
-                        children: [
-                          for (final f in pending)
-                            _FriendTile(friendship: f, myUid: user.id),
-                        ],
-                      ),
-              ],
-            );
-          },
         ),
       ),
     );

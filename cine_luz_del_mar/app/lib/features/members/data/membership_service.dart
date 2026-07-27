@@ -6,6 +6,7 @@ import '../../../core/config/app_config.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/collections.dart';
 import '../../../shared/models/membership_plan.dart';
+import '../../../core/utils/firestore_streams.dart';
 
 /// Packs de socio y pago de cuotas con Stripe Checkout.
 ///
@@ -30,7 +31,7 @@ class MembershipService {
         .collection(Col.membershipPlans)
         .where('active', isEqualTo: true)
         .orderBy('order')
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => [
             for (final doc in snap.docs)

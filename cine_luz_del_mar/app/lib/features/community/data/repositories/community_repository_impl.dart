@@ -9,6 +9,7 @@ import '../../../../core/services/collections.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/models/models.dart';
 import '../../domain/repositories/community_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [CommunityRepository] con Cloud Firestore y subida de
 /// medios al hosting propio de la asociación.
@@ -61,7 +62,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     }
     query = query.orderBy('createdAt', descending: true).limit(limit);
 
-    return query.snapshots().map(
+    return query.serverSnapshots().map(
       (snap) => snap.docs
           .map((doc) => Post.fromJson(doc.data()).copyWith(id: doc.id))
           .toList(),
@@ -73,7 +74,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     return _comments(postId)
         .orderBy('createdAt')
         .limit(100)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map(
@@ -85,7 +86,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
 
   @override
   Stream<bool> watchMyLike(String postId, String uid) {
-    return _like(postId, uid).snapshots().map((doc) => doc.exists);
+    return _like(postId, uid).serverSnapshots().map((doc) => doc.exists);
   }
 
   @override
@@ -210,7 +211,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
   Stream<List<Friendship>> watchFriendships(String uid) {
     return _friendships
         .where('uids', arrayContains: uid)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map(

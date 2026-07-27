@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -104,83 +105,85 @@ class _ResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        if (results.events.isNotEmpty) ...[
-          const SectionHeader(title: 'Actividades'),
-          for (final event in results.events)
-            ListTile(
-              leading: const Icon(Icons.calendar_month_outlined),
-              title: Text(event.title, maxLines: 1),
-              subtitle: Text(
-                event.start == null
-                    ? event.venue?.name ?? ''
-                    : Formatters.dateTime.format(event.start!),
+    return ContentColumn(
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          if (results.events.isNotEmpty) ...[
+            const SectionHeader(title: 'Actividades'),
+            for (final event in results.events)
+              ListTile(
+                leading: const Icon(Icons.calendar_month_outlined),
+                title: Text(event.title, maxLines: 1),
+                subtitle: Text(
+                  event.start == null
+                      ? event.venue?.name ?? ''
+                      : Formatters.dateTime.format(event.start!),
+                ),
+                onTap: () => context.push('/agenda/${event.id}'),
               ),
-              onTap: () => context.push('/agenda/${event.id}'),
-            ),
-        ],
-        if (results.films.isNotEmpty) ...[
-          const SectionHeader(title: 'Películas'),
-          for (final film in results.films)
-            ListTile(
-              leading: const Icon(Icons.theaters_outlined),
-              title: Text(film.title, maxLines: 1),
-              subtitle: Text(
-                [
-                  if (film.year != null) '${film.year}',
-                  if (film.director != null) film.director!,
-                ].join(' · '),
+          ],
+          if (results.films.isNotEmpty) ...[
+            const SectionHeader(title: 'Películas'),
+            for (final film in results.films)
+              ListTile(
+                leading: const Icon(Icons.theaters_outlined),
+                title: Text(film.title, maxLines: 1),
+                subtitle: Text(
+                  [
+                    if (film.year != null) '${film.year}',
+                    if (film.director != null) film.director!,
+                  ].join(' · '),
+                ),
+                trailing: film.ratingsCount > 0
+                    ? Text(
+                        '★ ${film.avgRating.toStringAsFixed(1)}',
+                        style: theme.textTheme.labelMedium,
+                      )
+                    : null,
+                onTap: () => context.push('/peliculas/${film.id}'),
               ),
-              trailing: film.ratingsCount > 0
-                  ? Text(
-                      '★ ${film.avgRating.toStringAsFixed(1)}',
-                      style: theme.textTheme.labelMedium,
-                    )
-                  : null,
-              onTap: () => context.push('/peliculas/${film.id}'),
-            ),
-        ],
-        if (results.news.isNotEmpty) ...[
-          const SectionHeader(title: 'Noticias'),
-          for (final item in results.news)
-            ListTile(
-              leading: const Icon(Icons.newspaper),
-              title: Text(item.title, maxLines: 2),
-              subtitle: item.publishedAt == null
-                  ? null
-                  : Text(Formatters.relative(item.publishedAt!)),
-              onTap: () => context.push('/noticias/${item.id}'),
-            ),
-        ],
-        if (results.resources.isNotEmpty) ...[
-          const SectionHeader(title: 'Biblioteca'),
-          for (final resource in results.resources)
-            ListTile(
-              leading: const Icon(Icons.video_library_outlined),
-              title: Text(resource.title, maxLines: 1),
-              subtitle: resource.category == null
-                  ? null
-                  : Text(resource.category!),
-              onTap: () => context.go('/biblioteca'),
-            ),
-        ],
-        if (results.users.isNotEmpty) ...[
-          const SectionHeader(title: 'Personas'),
-          for (final user in results.users)
-            ListTile(
-              leading: UserAvatar(
-                photoUrl: user.photoUrl,
-                name: user.displayName,
-                size: 40,
+          ],
+          if (results.news.isNotEmpty) ...[
+            const SectionHeader(title: 'Noticias'),
+            for (final item in results.news)
+              ListTile(
+                leading: const Icon(Icons.newspaper),
+                title: Text(item.title, maxLines: 2),
+                subtitle: item.publishedAt == null
+                    ? null
+                    : Text(Formatters.relative(item.publishedAt!)),
+                onTap: () => context.push('/noticias/${item.id}'),
               ),
-              title: Text(user.displayName, maxLines: 1),
-              subtitle: Text(user.userRole.label),
-              onTap: () => context.go('/comunidad'),
-            ),
+          ],
+          if (results.resources.isNotEmpty) ...[
+            const SectionHeader(title: 'Biblioteca'),
+            for (final resource in results.resources)
+              ListTile(
+                leading: const Icon(Icons.video_library_outlined),
+                title: Text(resource.title, maxLines: 1),
+                subtitle: resource.category == null
+                    ? null
+                    : Text(resource.category!),
+                onTap: () => context.go('/biblioteca'),
+              ),
+          ],
+          if (results.users.isNotEmpty) ...[
+            const SectionHeader(title: 'Personas'),
+            for (final user in results.users)
+              ListTile(
+                leading: UserAvatar(
+                  photoUrl: user.photoUrl,
+                  name: user.displayName,
+                  size: 40,
+                ),
+                title: Text(user.displayName, maxLines: 1),
+                subtitle: Text(user.userRole.label),
+                onTap: () => context.go('/comunidad'),
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

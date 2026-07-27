@@ -12,6 +12,7 @@ import '../../../../shared/models/models.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/confirm_dialog.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -73,7 +74,8 @@ class CommunityScreen extends ConsumerWidget {
             )
           : null,
       body: feed.when(
-        loading: () => const ShimmerList(itemHeight: 160),
+        loading: () =>
+            const ShimmerList(itemHeight: 160, maxWidth: ContentWidth.list),
         error: (error, _) => ErrorView(
           error: error,
           onRetry: () => ref.invalidate(feedProvider),
@@ -88,15 +90,17 @@ class CommunityScreen extends ConsumerWidget {
             );
           }
           final showBanner = !role.atLeast(UserRole.socio);
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-            itemCount: posts.length + (showBanner ? 1 : 0),
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              if (showBanner && index == 0) return const _GuestBanner();
-              final post = posts[showBanner ? index - 1 : index];
-              return _PostCard(post: post).animate().fadeIn(duration: 250.ms);
-            },
+          return ContentColumn(
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+              itemCount: posts.length + (showBanner ? 1 : 0),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                if (showBanner && index == 0) return const _GuestBanner();
+                final post = posts[showBanner ? index - 1 : index];
+                return _PostCard(post: post).animate().fadeIn(duration: 250.ms);
+              },
+            ),
           );
         },
       ),

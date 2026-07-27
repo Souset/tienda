@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/event_item.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../providers/agenda_providers.dart';
@@ -76,36 +77,39 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: _Calendar(
-                focusedDay: _focusedDay,
-                selectedDay: _selectedDay,
-                format: _format,
-                eventLoader: (day) => _eventsForDay(day, monthEvents),
-                onDaySelected: _onDaySelected,
-                onFormatChanged: (f) => setState(() => _format = f),
-                onPageChanged: _onPageChanged,
-                sameDay: _sameDay,
+      body: ContentColumn(
+        maxWidth: 900,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: _Calendar(
+                  focusedDay: _focusedDay,
+                  selectedDay: _selectedDay,
+                  format: _format,
+                  eventLoader: (day) => _eventsForDay(day, monthEvents),
+                  onDaySelected: _onDaySelected,
+                  onFormatChanged: (f) => setState(() => _format = f),
+                  onPageChanged: _onPageChanged,
+                  sameDay: _sameDay,
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SectionHeader(
-              title: _selectedDay == null
-                  ? 'Próximos eventos'
-                  : 'Eventos del día',
+            SliverToBoxAdapter(
+              child: SectionHeader(
+                title: _selectedDay == null
+                    ? 'Próximos eventos'
+                    : 'Eventos del día',
+              ),
             ),
-          ),
-          if (_selectedDay != null)
-            _buildDayList(_eventsForDay(_selectedDay!, monthEvents))
-          else
-            _buildUpcomingList(upcomingAsync),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
+            if (_selectedDay != null)
+              _buildDayList(_eventsForDay(_selectedDay!, monthEvents))
+            else
+              _buildUpcomingList(upcomingAsync),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
       ),
     );
   }

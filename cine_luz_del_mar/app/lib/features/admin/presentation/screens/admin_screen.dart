@@ -36,8 +36,7 @@ class AdminScreen extends ConsumerWidget {
       (const Tab(text: 'Biblioteca'), const LibraryTab()),
       if (role.canManageMembers)
         (const Tab(text: 'Socios'), const MembersTab()),
-      if (role.canManageMembers)
-        (const Tab(text: 'Packs'), const PlansTab()),
+      if (role.canManageMembers) (const Tab(text: 'Packs'), const PlansTab()),
       if (role.canManageUsers) (const Tab(text: 'Usuarios'), const UsersTab()),
       (const Tab(text: 'Push'), const PushTab()),
     ];

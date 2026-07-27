@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/services/collections.dart';
 import '../../../shared/models/models.dart';
+import '../../../core/utils/firestore_streams.dart';
 
 /// Actividades publicadas con localización para pintar en el mapa.
 class MapRepository {
@@ -18,7 +19,7 @@ class MapRepository {
         .where('start', isGreaterThanOrEqualTo: Timestamp.fromDate(from))
         .orderBy('start')
         .limit(100)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) =>
               [

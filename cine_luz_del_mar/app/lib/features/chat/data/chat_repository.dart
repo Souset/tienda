@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/collections.dart';
 import '../../../shared/models/models.dart';
+import '../../../core/utils/firestore_streams.dart';
 
 /// Chat interno de la asociación (directos y grupos) sobre Firestore.
 class ChatRepository {
@@ -18,7 +19,7 @@ class ChatRepository {
         .where('memberUids', arrayContains: uid)
         .orderBy('lastMessageAt', descending: true)
         .limit(50)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => [
             for (final doc in snap.docs)
@@ -34,7 +35,7 @@ class ChatRepository {
         .collection('messages')
         .orderBy('createdAt', descending: true)
         .limit(limit)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => [
             for (final doc in snap.docs)

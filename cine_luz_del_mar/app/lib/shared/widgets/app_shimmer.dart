@@ -38,20 +38,34 @@ class AppShimmer extends StatelessWidget {
 }
 
 /// Lista vertical de shimmers para estados de carga de listados.
+///
+/// [maxWidth] centra y acota el esqueleto en pantallas anchas, para que
+/// coincida con el ancho del contenido real al que sustituye.
 class ShimmerList extends StatelessWidget {
-  const ShimmerList({super.key, this.itemCount = 6, this.itemHeight = 88});
+  const ShimmerList({
+    super.key,
+    this.itemCount = 6,
+    this.itemHeight = 88,
+    this.maxWidth = double.infinity,
+  });
 
   final int itemCount;
   final double itemHeight;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(20),
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, _) => AppShimmer(height: itemHeight, radius: 12),
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: ListView.separated(
+          padding: const EdgeInsets.all(20),
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: itemCount,
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          itemBuilder: (_, _) => AppShimmer(height: itemHeight, radius: 12),
+        ),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../../../../core/config/user_role.dart';
 import '../../../../core/services/collections.dart';
 import '../../../../shared/models/models.dart';
 import '../../domain/repositories/library_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [LibraryRepository] con Cloud Firestore.
 ///
@@ -48,7 +49,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
     query = query.orderBy('createdAt', descending: true).limit(100);
 
-    return query.snapshots().map(
+    return query.serverSnapshots().map(
       (snap) => snap.docs
           .map(
             (doc) => LibraryResource.fromJson(doc.data()).copyWith(id: doc.id),

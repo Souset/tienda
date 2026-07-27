@@ -6,6 +6,7 @@ import '../../../../shared/models/app_user.dart';
 import '../../../../shared/models/event_item.dart';
 import '../../../films/domain/rating_math.dart';
 import '../../domain/repositories/agenda_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [AgendaRepository] con Cloud Firestore.
 ///
@@ -37,7 +38,7 @@ class AgendaRepositoryImpl implements AgendaRepository {
         .where('start', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
         .orderBy('start')
         .limit(50)
-        .snapshots()
+        .serverSnapshots()
         .map((snap) => snap.docs.map(_toEvent).toList());
   }
 
@@ -51,13 +52,13 @@ class AgendaRepositoryImpl implements AgendaRepository {
         .where('start', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
         .where('start', isLessThan: Timestamp.fromDate(end))
         .orderBy('start')
-        .snapshots()
+        .serverSnapshots()
         .map((snap) => snap.docs.map(_toEvent).toList());
   }
 
   @override
   Stream<EventItem?> watchEvent(String id) {
-    return _events.doc(id).snapshots().map((doc) {
+    return _events.doc(id).serverSnapshots().map((doc) {
       if (!doc.exists) return null;
       return _toEvent(doc);
     });
@@ -69,7 +70,7 @@ class AgendaRepositoryImpl implements AgendaRepository {
         .doc(eventId)
         .collection('reservations')
         .doc(uid)
-        .snapshots()
+        .serverSnapshots()
         .map((doc) {
           final data = doc.data();
           if (!doc.exists || data == null) return null;
@@ -175,6 +176,6 @@ class AgendaRepositoryImpl implements AgendaRepository {
       .doc(eventId)
       .collection('feedback')
       .doc(uid)
-      .snapshots()
+      .serverSnapshots()
       .map((snap) => (snap.data()?['score'] as num?)?.toDouble());
 }

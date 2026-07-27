@@ -6,6 +6,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../shared/models/models.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/content_width.dart';
 import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/user_avatar.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -146,23 +147,25 @@ class ChatListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: chats.when(
-        loading: () => const ShimmerList(itemHeight: 72),
-        error: (error, _) => ErrorView(
-          error: error,
-          onRetry: () => ref.invalidate(myChatsProvider),
+      body: ContentColumn(
+        child: chats.when(
+          loading: () => const ShimmerList(itemHeight: 72),
+          error: (error, _) => ErrorView(
+            error: error,
+            onRetry: () => ref.invalidate(myChatsProvider),
+          ),
+          data: (list) => list.isEmpty
+              ? const EmptyState(
+                  icon: Icons.chat_bubble_outline,
+                  title: 'Aún no tienes conversaciones',
+                  message: 'Empieza una con el lápiz de arriba.',
+                )
+              : ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (context, index) =>
+                      _ChatTile(chat: list[index], myUid: me?.id ?? ''),
+                ),
         ),
-        data: (list) => list.isEmpty
-            ? const EmptyState(
-                icon: Icons.chat_bubble_outline,
-                title: 'Aún no tienes conversaciones',
-                message: 'Empieza una con el lápiz de arriba.',
-              )
-            : ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (context, index) =>
-                    _ChatTile(chat: list[index], myUid: me?.id ?? ''),
-              ),
       ),
     );
   }

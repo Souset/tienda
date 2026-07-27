@@ -5,6 +5,7 @@ import '../../../../core/services/collections.dart';
 import '../../../../shared/models/attendance_record.dart';
 import '../../../../shared/models/member.dart';
 import '../../domain/repositories/members_repository.dart';
+import '../../../../core/utils/firestore_streams.dart';
 
 /// Implementación de [MembersRepository] con Cloud Firestore.
 ///
@@ -31,7 +32,7 @@ class MembersRepositoryImpl implements MembersRepository {
 
   @override
   Stream<Member?> watchMember(String uid) {
-    return _members.doc(uid).snapshots().map((doc) {
+    return _members.doc(uid).serverSnapshots().map((doc) {
       final data = doc.data();
       if (!doc.exists || data == null) return null;
       return Member.fromJson(data).copyWith(id: doc.id);
@@ -46,7 +47,7 @@ class MembersRepositoryImpl implements MembersRepository {
         .doc(uid)
         .collection('fees')
         .orderBy(FieldPath.documentId, descending: true)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map((doc) => MemberFee.fromJson(doc.data()).copyWith(id: doc.id))
@@ -61,7 +62,7 @@ class MembersRepositoryImpl implements MembersRepository {
         .collection('records')
         .orderBy('checkedInAt', descending: true)
         .limit(50)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => snap.docs
               .map(

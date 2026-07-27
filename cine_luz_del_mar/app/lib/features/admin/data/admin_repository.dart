@@ -9,6 +9,7 @@ import '../../../core/utils/geohash.dart';
 import '../../../core/utils/search_tokens.dart';
 import '../../../shared/models/models.dart';
 import '../domain/admin_stats.dart';
+import '../../../core/utils/firestore_streams.dart';
 
 /// Capa de datos del panel de administración: estadísticas, CRUD de
 /// contenido, gestión de socios y usuarios, portada y envío de push.
@@ -101,7 +102,7 @@ class AdminRepository {
         .collection(collection)
         .orderBy(orderBy, descending: descending)
         .limit(200)
-        .snapshots()
+        .serverSnapshots()
         .map(
           (snap) => [for (final doc in snap.docs) mapper(doc.data(), doc.id)],
         );
@@ -199,7 +200,7 @@ class AdminRepository {
       .collection(Col.members)
       .orderBy('memberNumber')
       .limit(500)
-      .snapshots()
+      .serverSnapshots()
       .map(
         (snap) => [
           for (final doc in snap.docs)
@@ -212,7 +213,7 @@ class AdminRepository {
       .doc(uid)
       .collection('fees')
       .orderBy(FieldPath.documentId, descending: true)
-      .snapshots()
+      .serverSnapshots()
       .map(
         (snap) => [
           for (final doc in snap.docs)
@@ -279,7 +280,7 @@ class AdminRepository {
   Stream<List<MembershipPlan>> watchAllPlans() => _firestore
       .collection(Col.membershipPlans)
       .orderBy('order')
-      .snapshots()
+      .serverSnapshots()
       .map(
         (snap) => [
           for (final doc in snap.docs)
@@ -287,11 +288,11 @@ class AdminRepository {
         ],
       );
 
-  Future<void> savePlan(MembershipPlan plan) =>
-      _save(Col.membershipPlans, plan.id, {
-        ...plan.toJson(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+  Future<void> savePlan(MembershipPlan plan) => _save(
+    Col.membershipPlans,
+    plan.id,
+    {...plan.toJson(), 'updatedAt': FieldValue.serverTimestamp()},
+  );
 
   Future<void> deletePlan(String id) => deleteDocById(Col.membershipPlans, id);
 
@@ -389,7 +390,7 @@ class AdminRepository {
       .collection(Col.users)
       .orderBy('displayName')
       .limit(300)
-      .snapshots()
+      .serverSnapshots()
       .map(
         (snap) => [
           for (final doc in snap.docs)
