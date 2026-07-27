@@ -15,6 +15,11 @@ import '../../../../shared/widgets/error_view.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../providers/members_providers.dart';
 
+/// Medidas de la rejilla de packs (móvil: una columna; escritorio: varias).
+const double _minCardWidth = 300;
+const double _maxContentWidth = 1240;
+const double _gap = 16;
+
 /// Pantalla "Hazte socio" (ruta `/socio`): packs de socio configurados por
 /// la junta, con pago online mediante Stripe Checkout.
 class BecomeMemberScreen extends ConsumerWidget {
@@ -70,53 +75,105 @@ class BecomeMemberScreen extends ConsumerWidget {
                   'actividad de la asociación.',
             );
           }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
-                child: Text(
-                  member != null
-                      ? 'Ya eres socio: al pagar renovarás tu cuota con el '
-                            'pack que elijas.'
-                      : 'Elige tu pack, paga online de forma segura y tu '
-                            'carné digital se activará al instante.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Rejilla responsive: tantas tarjetas por fila como quepan
+              // con un ancho cómodo, centradas y sin estirarse de más.
+              final width = constraints.maxWidth.clamp(0.0, _maxContentWidth);
+              final columns = ((width - 32 + _gap) / (_minCardWidth + _gap))
+                  .floor()
+                  .clamp(1, 4);
+              final rows = <List<(int, MembershipPlan)>>[];
+              for (var i = 0; i < plans.length; i += columns) {
+                rows.add([
+                  for (var j = i; j < i + columns && j < plans.length; j++)
+                    (j, plans[j]),
+                ]);
+              }
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _maxContentWidth,
                   ),
-                ),
-              ),
-              for (final (index, plan) in plans.indexed)
-                _PlanCard(
-                  plan: plan,
-                  busy: paying,
-                  onPay: () => _pay(context, ref, plan),
-                ).animate().fadeIn(
-                  delay: (80 * index).ms,
-                  duration: 350.ms,
-                ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.lock_outline,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Pago seguro con Stripe. No guardamos los datos de '
-                      'tu tarjeta.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
+                        child: Text(
+                          member != null
+                              ? 'Ya eres socio: al pagar renovarás tu cuota '
+                                    'con el pack que elijas.'
+                              : 'Elige tu pack, paga online de forma segura '
+                                    'y tu carné digital se activará al '
+                                    'instante.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
-                    ),
+                      for (final row in rows)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: _gap),
+                          child: IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (final (index, plan) in row) ...[
+                                  if (index != row.first.$1)
+                                    const SizedBox(width: _gap),
+                                  Expanded(
+                                    child:
+                                        _PlanCard(
+                                          plan: plan,
+                                          busy: paying,
+                                          // En rejilla el botón se alinea
+                                          // abajo para que todas cuadren.
+                                          fillHeight: columns > 1,
+                                          onPay: () => _pay(context, ref, plan),
+                                        ).animate().fadeIn(
+                                          delay: (80 * index).ms,
+                                          duration: 350.ms,
+                                        ),
+                                  ),
+                                ],
+                                // Huecos de la última fila incompleta: así
+                                // las tarjetas no se ensanchan de más.
+                                for (var i = row.length; i < columns; i++) ...[
+                                  const SizedBox(width: _gap),
+                                  const Expanded(child: SizedBox()),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 16,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'Pago seguro con Stripe. No guardamos los '
+                              'datos de tu tarjeta.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              );
+            },
           );
         },
       ),
@@ -126,11 +183,20 @@ class BecomeMemberScreen extends ConsumerWidget {
 
 /// Tarjeta de un pack de socio.
 class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.plan, required this.busy, required this.onPay});
+  const _PlanCard({
+    required this.plan,
+    required this.busy,
+    required this.onPay,
+    this.fillHeight = false,
+  });
 
   final MembershipPlan plan;
   final bool busy;
   final VoidCallback onPay;
+
+  /// En rejilla, la tarjeta ocupa toda la altura de su fila y el botón
+  /// queda anclado abajo (en lista vertical, la altura es la del contenido).
+  final bool fillHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +204,6 @@ class _PlanCard extends StatelessWidget {
     final highlight = plan.highlight;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainer,
@@ -152,6 +217,7 @@ class _PlanCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: fillHeight ? MainAxisSize.max : MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -228,7 +294,8 @@ class _PlanCard extends StatelessWidget {
                 ),
               ),
           ],
-          const SizedBox(height: 16),
+          if (fillHeight) const Spacer() else const SizedBox(height: 16),
+          if (fillHeight) const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
