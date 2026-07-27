@@ -1,0 +1,68 @@
+name: CI Cine Luz del Mar
+
+on:
+  push:
+    branches: [master, main]
+    paths: ['cine_luz_del_mar/**', '.github/workflows/ci.yml']
+  pull_request:
+    paths: ['cine_luz_del_mar/**', '.github/workflows/ci.yml']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Análisis, tests y build web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cine_luz_del_mar/app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Dependencias
+        run: flutter pub get
+
+      - name: Formato
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Análisis estático
+        run: flutter analyze
+
+      - name: Tests
+        run: flutter test
+
+      - name: Build web
+        run: flutter build web --release
+
+  rules:
+    name: Tests de reglas de Firestore
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('cine_luz_del_mar/firebase/rules-tests/package.json') != '' }}
+    defaults:
+      run:
+        working-directory: cine_luz_del_mar/firebase/rules-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Dependencias
+        run: npm ci
+
+      - name: Tests de reglas contra el emulador
+        run: npx firebase emulators:exec --only firestore --project demo-cine-luz-del-mar "npm test"

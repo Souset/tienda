@@ -1,0 +1,407 @@
+rules_version = '2';
+
+// Reglas de seguridad de Cine Luz del Mar.
+//
+// El rol vive en users/{uid}.role y solo admin/presidente pueden cambiarlo.
+// Jerarquía (debe coincidir con UserRole en la app):
+//   admin(6) > presidente(5) > junta(4) > coordinador(3) > socio(2) > invitado(1)
+//
+// Los agregados (reservedCount, likesCount, avgRating...) se actualizan desde
+// el cliente en la misma transacción que el documento que los justifica; las
+// reglas validan el delta y, cuando procede, exigen con getAfter() que el
+// documento acompañante exista al final de la transacción.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function roleRank(r) {
+      return r == 'admin' ? 6
+        : r == 'presidente' ? 5
+        : r == 'junta' ? 4
+        : r == 'coordinador' ? 3
+        : r == 'socio' ? 2
+        : 1;
+    }
+
+    function myRole() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : 'invitado';
+    }
+
+    function hasRank(min) {
+      return roleRank(myRole()) >= min;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function unchanged(field) {
+      return !(field in request.resource.data.diff(resource.data).affectedKeys());
+    }
+
+    // ---------- Usuarios ----------
+
+    match /users/{uid} {
+      // Los perfiles son visibles para usuarios autenticados (comunidad).
+      allow read: if isSignedIn();
+
+      // Alta del propio perfil: siempre como invitado, sin privilegios.
+      allow create: if isOwner(uid)
+        && request.resource.data.role == 'invitado';
+
+      // El dueño edita su perfil pero nunca su rol; admin/presidente
+      // gestionan usuarios y roles, sin poder tocar a nadie por encima de
+      // su propio rango (un presidente no puede degradar a un admin) ni
+      // ascender a nadie por encima de sí mismos.
+      allow update: if (isOwner(uid) && unchanged('role'))
+        || (hasRank(5)
+          && roleRank(resource.data.role) <= roleRank(myRole())
+          && roleRank(request.resource.data.role) <= roleRank(myRole()));
+
+      allow delete: if hasRank(6);
+    }
+
+    // ---------- Noticias ----------
+
+    match /news/{id} {
+      allow read: if resource.data.status == 'published' || hasRank(3);
+      allow create, update, delete: if hasRank(3);
+    }
+
+    // ---------- Eventos y reservas ----------
+
+    match /events/{eventId} {
+      allow read: if resource.data.status == 'published' || hasRank(3);
+      allow create, delete: if hasRank(3);
+
+      // Gestores editan todo; cualquier usuario autenticado solo puede
+      // mover el contador de reservas en ±1 dentro de la MISMA transacción
+      // que crea (status active) o cancela (status cancelled) su propia
+      // reserva — nunca en solitario —, o los agregados de valoración
+      // (validados en rango y con delta acotado) junto a su propia
+      // valoración.
+      allow update: if hasRank(3)
+        || (isSignedIn()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['reservedCount', 'updatedAt'])
+          && request.resource.data.reservedCount >= 0
+          && ((request.resource.data.reservedCount
+                == resource.data.reservedCount + 1
+              && getAfter(/databases/$(database)/documents/events/$(eventId)
+                  /reservations/$(request.auth.uid)).data.status == 'active')
+            || (request.resource.data.reservedCount
+                == resource.data.reservedCount - 1
+              && getAfter(/databases/$(database)/documents/events/$(eventId)
+                  /reservations/$(request.auth.uid)).data.status
+                == 'cancelled')))
+        || (isVerified()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['feedbackAvg', 'feedbackCount', 'updatedAt'])
+          && request.resource.data.feedbackAvg >= 0
+          && request.resource.data.feedbackAvg <= 5
+          && request.resource.data.feedbackCount >= 0
+          // .get() con valor por defecto: los eventos creados antes de la
+          // función de valoraciones no tienen aún estos campos.
+          && ((request.resource.data.feedbackCount
+                >= resource.data.get('feedbackCount', 0)
+              && request.resource.data.feedbackCount
+                <= resource.data.get('feedbackCount', 0) + 1
+              && existsAfter(/databases/$(database)/documents
+                  /events/$(eventId)/feedback/$(request.auth.uid)))
+            || (request.resource.data.feedbackCount
+                == resource.data.get('feedbackCount', 0) - 1
+              && !existsAfter(/databases/$(database)/documents
+                  /events/$(eventId)/feedback/$(request.auth.uid)))));
+
+      match /reservations/{uid} {
+        allow read: if isOwner(uid) || hasRank(3);
+
+        // Reservar: solo el propio usuario, evento publicado y con plazas;
+        // el contador debe quedar incrementado en la misma transacción.
+        allow create: if isOwner(uid)
+          && request.resource.data.status == 'active'
+          && get(/databases/$(database)/documents/events/$(eventId))
+              .data.status == 'published'
+          && get(/databases/$(database)/documents/events/$(eventId))
+              .data.reservedCount
+            < get(/databases/$(database)/documents/events/$(eventId))
+              .data.capacity
+          && getAfter(/databases/$(database)/documents/events/$(eventId))
+              .data.reservedCount
+            == get(/databases/$(database)/documents/events/$(eventId))
+              .data.reservedCount + 1;
+
+        // Cancelar la propia reserva (contador decrementado en la misma
+        // transacción) o check-in por parte de un coordinador o superior.
+        allow update: if (isOwner(uid)
+            && resource.data.status == 'active'
+            && request.resource.data.status == 'cancelled'
+            && getAfter(/databases/$(database)/documents/events/$(eventId))
+                .data.reservedCount
+              == get(/databases/$(database)/documents/events/$(eventId))
+                .data.reservedCount - 1)
+          || hasRank(3);
+
+        allow delete: if hasRank(3);
+      }
+
+      // Valoración post-evento de los asistentes (1-5 + comentario).
+      match /feedback/{uid} {
+        allow read: if isSignedIn();
+        allow create, update: if isOwner(uid)
+          && isVerified()
+          && request.resource.data.score >= 1
+          && request.resource.data.score <= 5;
+        allow delete: if isOwner(uid) || hasRank(4);
+      }
+    }
+
+    // ---------- Películas y valoraciones ----------
+
+    match /films/{filmId} {
+      allow read: if true;
+      allow create, delete: if hasRank(3);
+
+      // Gestores editan la ficha; los socios solo tocan los agregados de
+      // valoración (en rango, con delta acotado y siempre acompañados de
+      // su propia valoración en la misma transacción).
+      allow update: if hasRank(3)
+        || (isVerified()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['avgRating', 'ratingsCount', 'updatedAt'])
+          && request.resource.data.avgRating >= 0
+          && request.resource.data.avgRating <= 5
+          && request.resource.data.ratingsCount >= 0
+          && ((request.resource.data.ratingsCount
+                >= resource.data.get('ratingsCount', 0)
+              && request.resource.data.ratingsCount
+                <= resource.data.get('ratingsCount', 0) + 1
+              && existsAfter(/databases/$(database)/documents
+                  /films/$(filmId)/ratings/$(request.auth.uid)))
+            || (request.resource.data.ratingsCount
+                == resource.data.get('ratingsCount', 0) - 1
+              && !existsAfter(/databases/$(database)/documents
+                  /films/$(filmId)/ratings/$(request.auth.uid)))));
+
+      match /ratings/{uid} {
+        allow read: if true;
+        allow create, update: if isOwner(uid)
+          && isVerified()
+          && request.resource.data.score >= 0.5
+          && request.resource.data.score <= 5;
+        allow delete: if isOwner(uid) || hasRank(4);
+      }
+    }
+
+    // ---------- Comunidad ----------
+
+    match /posts/{postId} {
+      // Forma OR (no ternaria) para que las consultas de listado sin filtro
+      // de visibilidad sean demostrables para socio+.
+      allow read: if hasRank(2)
+        || (isSignedIn() && resource.data.visibility == 'public');
+
+      allow create: if hasRank(2)
+        && isVerified()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.likesCount == 0
+        && request.resource.data.commentsCount == 0;
+
+      // El autor edita su contenido; cualquier usuario mueve contadores ±1
+      // acompañando su like/comentario; junta+ modera.
+      allow update: if (isOwner(resource.data.authorUid)
+          && unchanged('authorUid')
+          && unchanged('likesCount')
+          && unchanged('commentsCount'))
+        || (isSignedIn()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['likesCount', 'commentsCount', 'updatedAt'])
+          && (request.resource.data.likesCount
+                - resource.data.likesCount) <= 1
+          && (resource.data.likesCount
+                - request.resource.data.likesCount) <= 1
+          && (request.resource.data.commentsCount
+                - resource.data.commentsCount) <= 1
+          && (resource.data.commentsCount
+                - request.resource.data.commentsCount) <= 1
+          && request.resource.data.likesCount >= 0
+          && request.resource.data.commentsCount >= 0)
+        || hasRank(4);
+
+      allow delete: if isOwner(resource.data.authorUid) || hasRank(4);
+
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if hasRank(2)
+          && isVerified()
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.text.size() <= 1000;
+        allow update: if isOwner(resource.data.authorUid);
+        allow delete: if isOwner(resource.data.authorUid) || hasRank(4);
+      }
+
+      match /likes/{uid} {
+        allow read: if isSignedIn();
+        allow create, delete: if isOwner(uid);
+      }
+    }
+
+    match /friendships/{id} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.uids;
+
+      allow create: if isSignedIn()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.auth.uid in request.resource.data.uids
+        && request.resource.data.uids.size() == 2;
+
+      // Solo el usuario receptor puede aceptar la solicitud.
+      allow update: if isSignedIn()
+        && request.auth.uid in resource.data.uids
+        && resource.data.requestedBy != request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'updatedAt']);
+
+      allow delete: if isSignedIn() && request.auth.uid in resource.data.uids;
+    }
+
+    // ---------- Biblioteca ----------
+
+    match /library/{id} {
+      // coordinador+ primero: permite listados sin filtro de minRole.
+      allow read: if hasRank(3)
+        || roleRank(myRole()) >= roleRank(resource.data.minRole);
+      allow create, update, delete: if hasRank(3);
+    }
+
+    // ---------- Socios y cuotas ----------
+
+    match /members/{uid} {
+      // coordinador+ puede leer (necesario para el check-in manual por
+      // número de socio); las cuotas siguen siendo cosa de junta+.
+      allow read: if isOwner(uid) || hasRank(3);
+      allow create, update, delete: if hasRank(4);
+
+      match /fees/{year} {
+        allow read: if isOwner(uid) || hasRank(4);
+        allow create, update, delete: if hasRank(4);
+      }
+    }
+
+    match /counters/{name} {
+      allow read, write: if hasRank(4);
+    }
+
+    // Packs de socio configurables (precio, ventajas, periodicidad).
+    // Forma OR list-safe: junta+ lista todos; el resto solo los activos
+    // (las consultas públicas deben filtrar active == true).
+    match /membership_plans/{id} {
+      allow read: if hasRank(4) || resource.data.active == true;
+      allow create, update, delete: if hasRank(4);
+    }
+
+    // Los pagos de Stripe (stripe_payments) los escribe solo el servidor de
+    // Nicalia con la service account: quedan bajo la denegación por defecto.
+
+    // ---------- Chat ----------
+
+    match /chats/{chatId} {
+      allow read: if isSignedIn()
+        && request.auth.uid in resource.data.memberUids;
+
+      allow create: if hasRank(2)
+        && request.auth.uid in request.resource.data.memberUids;
+
+      // Miembros actualizan el último mensaje; nadie cambia los miembros
+      // salvo junta+ (grupos oficiales).
+      allow update: if (isSignedIn()
+          && request.auth.uid in resource.data.memberUids
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'lastMessageText', 'lastMessageSenderUid', 'lastMessageAt',
+              'name', 'updatedAt'
+            ]))
+        || hasRank(4);
+
+      allow delete: if hasRank(4);
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn()
+          && request.auth.uid
+            in get(/databases/$(database)/documents/chats/$(chatId))
+              .data.memberUids;
+
+        allow create: if isSignedIn()
+          && request.auth.uid
+            in get(/databases/$(database)/documents/chats/$(chatId))
+              .data.memberUids
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.text.size() <= 2000;
+
+        // Solo marcar como leído (readBy) por otros miembros.
+        allow update: if isSignedIn()
+          && request.auth.uid
+            in get(/databases/$(database)/documents/chats/$(chatId))
+              .data.memberUids
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['readBy']);
+
+        allow delete: if isOwner(resource.data.senderUid) || hasRank(4);
+      }
+    }
+
+    // ---------- Notificaciones (buzón in-app) ----------
+
+    match /notifications/{uid}/items/{id} {
+      allow read, delete: if isOwner(uid);
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['read']);
+      allow create: if hasRank(3);
+    }
+
+    // ---------- Certificados y asistencia ----------
+
+    match /certificates/{id} {
+      allow read: if isOwner(resource.data.uid) || hasRank(3);
+      allow create: if hasRank(3)
+        && request.resource.data.issuedBy == request.auth.uid;
+      allow update, delete: if hasRank(4);
+    }
+
+    match /attendance/{uid}/records/{eventId} {
+      allow read: if isOwner(uid) || hasRank(3);
+      allow create, update, delete: if hasRank(3);
+    }
+
+    // ---------- Configuración de la app ----------
+
+    match /app_config/{doc} {
+      // Solo 'home' (el banner de portada) es público. El resto —como
+      // 'features', que guarda claves de API del equipo— es de gestión.
+      allow read: if doc == 'home' || hasRank(3);
+      allow write: if hasRank(3);
+    }
+
+    // Denegación por defecto para cualquier otra ruta.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
